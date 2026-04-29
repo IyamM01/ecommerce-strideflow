@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,500&family=Lexend:wght@100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  /* ========================
+    IndigoStyle Color System
+     ========================= */
+  --color-primary: #162839;
+  --color-background: #f8fafc;
+  --color-accent: #f97316;
+
+  --color-border: #e2e8f0;
+  --color-text-secondary: #fe7520;
+  --color-text-primary: #ffffff;
+
+  /* Optional palette aliases */
+  --color-deep-indigo: #312e81;
+  --color-slate-white: #f8fafc;
+  --color-orange-energy: #f97316;
+  --color-light-gray: #e2e8f0;
+  --color-medium-gray: #64748b;
+  --color-dark-gray: #1e293b;
+
+  /* Typography */
+  --font-lexend: 'Lexend', sans-serif;  
+}

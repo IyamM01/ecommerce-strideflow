@@ -1,95 +1,133 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ShoppingCart, CircleUser, Search } from '@lucide/vue'
+import { useRouter, RouterLink } from 'vue-router'
+import { ShoppingCart, CircleUser, Search, Heart, Menu, X, LogOut } from '@lucide/vue'
+import { useAuthStore } from '@/stores/authStore'
+import { useCartStore } from '@/stores/cartStore'
 
+const authStore = useAuthStore()
+const cartStore = useCartStore()
+const router = useRouter()
 const isOpen = ref(false)
+
+const handleLogout = async () => {
+  await authStore.logout()
+  router.push('/auth/login')
+}
 </script>
 
 <template>
-  <header class="w-full border-b bg-primary">
-    <nav class="flex items-center justify-between mx-auto h-18 px-6">
+  <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white">
+    <nav class="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
       <!-- Logo -->
-      <div class="flex items-center">
-        <a href="/" class="inline-flex items-center">
+      <div class="flex w-1/4 items-center">
+        <RouterLink to="/" class="inline-flex items-center">
           <img src="/src/assets/logo.webp" alt="Logo" class="h-15 w-auto object-contain" />
-        </a>
+        </RouterLink>
       </div>
 
-      <!-- Menu -->
-      <ul class="hidden items-center gap-10 md:flex">
-        <li>
-          <a
-            href="#"
-            class="text-sm font-lexend font-medium text-white transition hover:text-text-secondary"
-          >
-            Men</a
-          >
-        </li>
-        <li>
-          <a
-            href="#"
-            class="text-sm font-lexend font-medium text-white transition hover:text-text-secondary"
-          >
-            Women
-          </a>
-        </li>
-        <li>
-          <a
-            href="#"
-            class="text-sm font-lexend font-medium text-white transition hover:text-text-secondary"
-          >
-            Kids
-          </a>
-        </li>
-      </ul>
+      <!-- Center: Menu -->
+      <div class="hidden flex-1 justify-center md:flex">
+        <ul class="flex items-center gap-10">
+          <li>
+            <RouterLink
+              to="/men"
+              class="relative text-[15px] font-semibold font-poppins text-secondary transition hover:text-primary after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
+              active-class="text-primary after:w-full"
+            >
+              Men
+            </RouterLink>
+          </li>
 
-      <!-- Right Section -->
-      <div class="flex items-center gap-5">
+          <li>
+            <RouterLink
+              to="/woman"
+              class="relative text-[15px] font-semibold font-poppins text-secondary transition hover:text-primary after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
+              active-class="text-primary after:w-full"
+            >
+              Woman
+            </RouterLink>
+          </li>
+
+          <li>
+            <RouterLink
+              to="/kids"
+              class="relative text-[15px] font-semibold font-poppins text-secondary transition hover:text-primary after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
+              active-class="text-primary after:w-full"
+            >
+              Kids
+            </RouterLink>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Right: Search & Icons -->
+      <div class="flex w-1/4 items-center justify-end gap-6">
         <!-- Search -->
         <div class="hidden lg:block">
-          <div class="flex h-10 w-57.5 items-center rounded-full bg-slate-100 px-4">
-            <Search class="text-slate-600"/>
+          <div class="flex h-10 w-64 items-center rounded-full bg-background px-4">
             <input
               type="text"
               placeholder="Search..."
-              class="ml-2 w-full bg-transparent text-sm text-slate-600 placeholder:text-slate-400 focus:outline-none"
+              class="w-full bg-transparent text-sm text-secondary placeholder:text-quaternary focus:outline-none"
             />
+            <Search class="ml-2 h-4 w-4 text-quaternary" />
           </div>
         </div>
 
-        <!-- Cart -->
+        <!-- Wishlist -->
         <a
           href="#"
-          class="flex items-center gap-1 text-[13px] font-semibold uppercase tracking-wide text-white transition hover:text-text-secondary"
+          class="relative flex items-center text-primary transition hover:opacity-80 after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
         >
-          <ShoppingCart />
+          <Heart class="h-5 w-5" stroke-width="2" />
         </a>
+
+        <!-- Cart -->
+        <RouterLink
+          to="/cart"
+          class="relative flex items-center text-primary transition hover:opacity-80 after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
+        >
+          <ShoppingCart class="h-5 w-5" stroke-width="2" />
+
+          <span
+            v-if="cartStore.totalItems > 0"
+            class="absolute -right-3 -top-3 flex h-5 min-w-5 items-center justify-center rounded-full bg-black px-1.5 text-[10px] font-bold leading-none text-white"
+          >
+            {{ cartStore.totalItems }}
+          </span>
+        </RouterLink>
 
         <!-- Account -->
-        <a
-          href="#"
-          class="flex items-center gap-1 text-[13px] font-semibold uppercase tracking-wide text-white transition hover:text-text-secondary"
+        <RouterLink
+          v-if="!authStore.isLoggedIn"
+          to="/auth/login"
+          class="relative flex items-center text-[15px] font-semibold font-poppins text-secondary transition hover:text-primary after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
         >
-          <CircleUser />
-        </a>
+          Login
+        </RouterLink>
+
+        <div v-else class="flex items-center gap-4">
+          <RouterLink
+            to="/profile"
+            class="relative flex items-center text-primary transition hover:opacity-80"
+          >
+            <CircleUser class="h-5 w-5" stroke-width="2" />
+          </RouterLink>
+
+          <button
+            @click="handleLogout"
+            class="text-secondary hover:text-red-500 transition-colors"
+            title="Logout"
+          >
+            <LogOut class="h-5 w-5" stroke-width="2" />
+          </button>
+        </div>
 
         <!-- Mobile Menu Button -->
-        <button class="md:hidden" type="button" @click="isOpen = !isOpen">
-          <svg
-            class="h-6 w-6 text-indigo-900"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              v-if="!isOpen"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-            <path v-else stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+        <button class="md:hidden text-primary" type="button" @click="isOpen = !isOpen">
+          <X v-if="isOpen" class="h-6 w-6" />
+          <Menu v-else class="h-6 w-6" />
         </button>
       </div>
     </nav>
@@ -97,35 +135,47 @@ const isOpen = ref(false)
     <!-- Mobile Menu -->
     <div v-if="isOpen" class="border-t border-slate-200 bg-white px-6 py-4 md:hidden">
       <ul class="space-y-4">
-        <li><a href="#" class="block text-sm font-medium text-primary">Men</a></li>
-        <li><a href="#" class="block text-sm font-medium text-primary">Women</a></li>
-        <li><a href="#" class="block text-sm font-medium text-primary">Kids</a></li>
+        <li>
+          <RouterLink
+            to="/men"
+            class="block text-base font-semibold text-secondary hover:text-primary"
+            @click="isOpen = false"
+          >
+            Men
+          </RouterLink>
+        </li>
+
+        <li>
+          <RouterLink
+            to="/woman"
+            class="block text-base font-semibold text-secondary hover:text-primary"
+            @click="isOpen = false"
+          >
+            Woman
+          </RouterLink>
+        </li>
+
+        <li>
+          <RouterLink
+            to="/kids"
+            class="block text-base font-semibold text-secondary hover:text-primary"
+            @click="isOpen = false"
+          >
+            Kids
+          </RouterLink>
+        </li>
       </ul>
 
-      <div class="mt-4">
-        <div class="flex h-10 items-center rounded-full bg-slate-100 px-4">
-          <svg
-            class="h-4 w-4 text-slate-400"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0a7 7 0 0114 0z"
-            />
-          </svg>
+      <div class="mt-5">
+        <div class="flex h-10 items-center rounded-full bg-background px-4">
           <input
             type="text"
             placeholder="Search..."
-            class="ml-2 w-full bg-transparent text-sm text-slate-600 placeholder:text-slate-400 focus:outline-none"
+            class="w-full bg-transparent text-sm text-secondary placeholder:text-quaternary focus:outline-none"
           />
+          <Search class="ml-2 h-4 w-4 text-quaternary" />
         </div>
       </div>
     </div>
   </header>
 </template>
-
-

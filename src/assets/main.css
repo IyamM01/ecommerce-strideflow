@@ -3,24 +3,34 @@
 
 @theme {
   /* ========================
-    IndigoStyle Color System
+    Website Color System
      ========================= */
-  --color-primary: #162839;
-  --color-background: #f8fafc;
-  --color-accent: #f97316;
+  --color-primary: #000000;
+  --color-background: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f9fafb;
+  --color-surface-container: #f3f4f6;
+  --color-surface-container-high: #e5e7eb;
+  --color-surface-container-highest: #d1d5db;
+  --color-on-background: #111827;
+  --color-on-surface: #111827;
+  --color-on-surface-variant: #6b7280;
+  --color-outline: #6b7280;
+  --color-outline-variant: #e5e7eb;
+  --color-primary-container: #111827;
+  --color-on-primary-container: #ffffff;
+  --color-inverse-primary: #f3f4f6;
+  --color-error: #dc2626;
+  --color-error-container: #fee2e2;
+  --color-on-error-container: #991b1b;
+  --color-secondary-container: #374151;
 
-  --color-border: #e2e8f0;
-  --color-text-secondary: #fe7520;
-  --color-text-primary: #ffffff;
-
-  /* Optional palette aliases */
-  --color-deep-indigo: #312e81;
-  --color-slate-white: #f8fafc;
-  --color-orange-energy: #f97316;
-  --color-light-gray: #e2e8f0;
-  --color-medium-gray: #64748b;
-  --color-dark-gray: #1e293b;
+  /* Spacing & Utilities */
+  --spacing-margin: 32px;
+  --spacing-gutter: 24px;
+  --spacing-sm: 12px;
 
   /* Typography */
-  --font-lexend: 'Lexend', sans-serif;  
+  --font-inter: 'Inter', sans-serif;
 }

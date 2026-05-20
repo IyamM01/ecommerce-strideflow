@@ -5,24 +5,30 @@ import { useRoute, useRouter } from 'vue-router'
 import Sidebar from '@/components/admin/Sidebar.vue'
 import UserForm from '@/components/admin/UserForm.vue'
 import { userService } from '@/services/userService'
-import type { UserPayload } from '@/types/user'
+import type { AdminUserFormValues } from '@/types/adminUserForm'
+import type { User, UserPayload } from '@/types/user'
+import { getApiErrorMessage } from '@/utils/apiResponse'
 
 const route = useRoute()
 const router = useRouter()
 
 const loading = ref(false)
 const error = ref<string | null>(null)
-const user = ref<any>(null)
+const user = ref<User | null>(null)
 const userId = computed(() => Number(route.params.id))
 
-const initialValues = computed(() => {
+const normalizeRole = (role?: string): AdminUserFormValues['role'] => {
+  return role === 'admin' ? 'admin' : 'customer'
+}
+
+const initialValues = computed<Partial<AdminUserFormValues>>(() => {
   if (!user.value) return {}
 
   return {
     name: user.value.name,
     email: user.value.email,
     phone: user.value.phone ?? '',
-    role: user.value.role ?? 'customer',
+    role: normalizeRole(user.value.role),
   }
 })
 
@@ -37,8 +43,8 @@ const loadUser = async () => {
 
   try {
     user.value = await userService.getById(userId.value)
-  } catch (err: any) {
-    error.value = err.response?.data?.message || 'Gagal mengambil detail user'
+  } catch (err) {
+    error.value = getApiErrorMessage(err, 'Gagal mengambil detail user')
   } finally {
     loading.value = false
   }
@@ -65,8 +71,8 @@ const handleSubmit = async (payload: UserPayload) => {
   try {
     await userService.update(userId.value, nextPayload)
     await router.push('/admin/users')
-  } catch (err: any) {
-    error.value = err.response?.data?.message || 'Gagal mengupdate user'
+  } catch (err) {
+    error.value = getApiErrorMessage(err, 'Gagal mengupdate user')
   } finally {
     loading.value = false
   }

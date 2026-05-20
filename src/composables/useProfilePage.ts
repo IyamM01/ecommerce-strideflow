@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/authStore'
 import type { Order } from '@/types/order'
 import type { ProfileFormValues } from '@/types/profile'
 import type { User } from '@/types/user'
+import { getApiErrorMessage } from '@/utils/apiResponse'
 
 const splitName = (fullName?: string) => {
   const value = fullName?.trim() ?? ''
@@ -20,14 +21,7 @@ const splitName = (fullName?: string) => {
   }
 }
 
-const formatErrorMessage = (error: any, fallback: string) => {
-  return error.response?.data?.message || fallback
-}
-
-export const useProfilePage = (
-  routePath: Ref<string>,
-  ordersSection: Ref<HTMLElement | null>,
-) => {
+export const useProfilePage = (routePath: Ref<string>, ordersSection: Ref<HTMLElement | null>) => {
   const authStore = useAuthStore()
 
   const loading = ref(true)
@@ -101,8 +95,8 @@ export const useProfilePage = (
       authStore.syncUser(userData)
       applyProfileToForm(userData)
       orders.value = ordersResponse.data ?? []
-    } catch (err: any) {
-      error.value = formatErrorMessage(err, 'Gagal memuat profile user.')
+    } catch (err) {
+      error.value = getApiErrorMessage(err, 'Gagal memuat profile user.')
     } finally {
       loading.value = false
       scrollToOrdersIfNeeded()
@@ -141,8 +135,8 @@ export const useProfilePage = (
       authStore.syncUser(updatedUser)
       applyProfileToForm(updatedUser)
       successMessage.value = 'Profile berhasil diperbarui.'
-    } catch (err: any) {
-      error.value = formatErrorMessage(err, 'Gagal menyimpan perubahan profile.')
+    } catch (err) {
+      error.value = getApiErrorMessage(err, 'Gagal menyimpan perubahan profile.')
     } finally {
       saving.value = false
     }

@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import Sidebar from '@/components/admin/Sidebar.vue'
 import { userService } from '@/services/userService'
 import type { User } from '@/types/user'
+import { getApiErrorMessage } from '@/utils/apiResponse'
 
 const router = useRouter()
 const loading = ref(false)
@@ -16,10 +17,11 @@ const filteredUsers = computed(() => {
   const keyword = searchQuery.value.trim().toLowerCase()
   if (!keyword) return users.value
 
-  return users.value.filter((user) =>
-    user.name.toLowerCase().includes(keyword) ||
-    user.email.toLowerCase().includes(keyword) ||
-    (user.role || '').toLowerCase().includes(keyword),
+  return users.value.filter(
+    (user) =>
+      user.name.toLowerCase().includes(keyword) ||
+      user.email.toLowerCase().includes(keyword) ||
+      (user.role || '').toLowerCase().includes(keyword),
   )
 })
 
@@ -35,8 +37,8 @@ const fetchUsers = async () => {
   try {
     const response = await userService.getAll()
     users.value = response.data ?? []
-  } catch (err: any) {
-    error.value = err.response?.data?.message || 'Gagal mengambil data user'
+  } catch (err) {
+    error.value = getApiErrorMessage(err, 'Gagal mengambil data user')
   } finally {
     loading.value = false
   }
@@ -48,8 +50,8 @@ const handleDelete = async (id: number) => {
   try {
     await userService.delete(id)
     users.value = users.value.filter((user) => user.id !== id)
-  } catch (err: any) {
-    alert(err.response?.data?.message || 'Gagal menghapus user')
+  } catch (err) {
+    alert(getApiErrorMessage(err, 'Gagal menghapus user'))
   }
 }
 
@@ -78,14 +80,22 @@ onMounted(() => {
         </button>
       </header>
 
-      <div v-if="error" class="mb-6 rounded-2xl border border-error/20 bg-error-container px-5 py-4 text-sm text-on-error-container">
+      <div
+        v-if="error"
+        class="mb-6 rounded-2xl border border-error/20 bg-error-container px-5 py-4 text-sm text-on-error-container"
+      >
         {{ error }}
       </div>
 
-      <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container-high overflow-hidden">
+      <div
+        class="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container-high overflow-hidden"
+      >
         <div class="p-6 border-b border-surface-container-high">
           <div class="relative max-w-md">
-            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+            <span
+              class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant"
+              >search</span
+            >
             <input
               v-model="searchQuery"
               type="text"
@@ -98,7 +108,9 @@ onMounted(() => {
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="bg-surface-container-low/50 text-on-surface-variant text-[11px] font-bold uppercase tracking-widest border-b border-surface-container-high">
+              <tr
+                class="bg-surface-container-low/50 text-on-surface-variant text-[11px] font-bold uppercase tracking-widest border-b border-surface-container-high"
+              >
                 <th class="p-5 pl-8">User</th>
                 <th class="p-5">Phone</th>
                 <th class="p-5">Role</th>
@@ -109,7 +121,9 @@ onMounted(() => {
 
             <tbody class="divide-y divide-surface-container-high">
               <tr v-if="loading">
-                <td colspan="5" class="p-8 text-center text-on-surface-variant">Loading users...</td>
+                <td colspan="5" class="p-8 text-center text-on-surface-variant">
+                  Loading users...
+                </td>
               </tr>
 
               <tr
@@ -119,7 +133,9 @@ onMounted(() => {
               >
                 <td class="p-5 pl-8">
                   <div class="flex items-center gap-4">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-sm font-black text-white">
+                    <div
+                      class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-sm font-black text-white"
+                    >
                       {{ user.name?.slice(0, 1).toUpperCase() }}
                     </div>
                     <div class="flex flex-col min-w-0">
@@ -134,7 +150,11 @@ onMounted(() => {
                 <td class="p-5">
                   <span
                     class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider"
-                    :class="user.role === 'admin' ? 'bg-primary text-white' : 'bg-surface-container-high text-on-surface'"
+                    :class="
+                      user.role === 'admin'
+                        ? 'bg-primary text-white'
+                        : 'bg-surface-container-high text-on-surface'
+                    "
                   >
                     {{ user.role || 'customer' }}
                   </span>
@@ -143,7 +163,9 @@ onMounted(() => {
                 <td class="p-5 text-on-surface-variant">{{ formatDate(user.created_at) }}</td>
 
                 <td class="p-5 pr-8">
-                  <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div
+                    class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
                     <button
                       @click="router.push(`/admin/users/${user.id}/edit`)"
                       class="p-2 rounded-lg bg-surface-container-high text-on-surface hover:bg-primary-container hover:text-white transition-all"

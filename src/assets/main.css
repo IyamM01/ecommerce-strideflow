@@ -6,6 +6,9 @@
     Website Color System
      ========================= */
   --color-primary: #000000;
+  --color-secondary: #4b5563;
+  --color-tertiary: #64748b;
+  --color-quaternary: #94a3b8;
   --color-background: #ffffff;
   --color-surface: #ffffff;
   --color-surface-container-lowest: #ffffff;
@@ -33,4 +36,27 @@
 
   /* Typography */
   --font-inter: 'Inter', sans-serif;
+  --font-poppins: 'Poppins', sans-serif;
+  --font-display: 'Poppins', sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  background: #ffffff;
+  color: #111827;
+  font-family: var(--font-inter);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  letter-spacing: 0;
 }

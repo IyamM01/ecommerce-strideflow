@@ -1,14 +1,15 @@
 import api from './api'
+import type { ApiPayload } from '@/types/api'
 import type { Product, ProductPayload } from '@/types/product'
 
 export const productService = {
-  async getAll(): Promise<Product[]> {
-    const response = await api.get('/products')
+  async getAll(): Promise<ApiPayload<Product[]>> {
+    const response = await api.get<ApiPayload<Product[]>>('/products')
     return response.data
   },
 
-  async getById(id: number): Promise<Product> {
-    const response = await api.get(`/products/${id}`)
+  async getById(id: number): Promise<ApiPayload<Product>> {
+    const response = await api.get<ApiPayload<Product>>(`/products/${id}`)
     return response.data
   },
 

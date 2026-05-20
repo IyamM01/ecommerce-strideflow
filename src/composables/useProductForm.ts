@@ -54,7 +54,7 @@ export const useProductForm = (options: UseProductFormOptions) => {
   )
 
   const allErrors = computed(() => ({
-    ...(options.errors.value ?? {}),
+    ...options.errors.value,
     ...localErrors.value,
   }))
 
@@ -95,8 +95,10 @@ export const useProductForm = (options: UseProductFormOptions) => {
 
     if (!form.name.trim()) localErrors.value.name = ['Nama produk wajib diisi.']
     if (!form.description.trim()) localErrors.value.description = ['Deskripsi produk wajib diisi.']
-    if (form.price === null || Number.isNaN(form.price)) localErrors.value.price = ['Harga wajib diisi.']
-    if (form.stock === null || Number.isNaN(form.stock)) localErrors.value.stock = ['Stok wajib diisi.']
+    if (form.price === null || Number.isNaN(form.price))
+      localErrors.value.price = ['Harga wajib diisi.']
+    if (form.stock === null || Number.isNaN(form.stock))
+      localErrors.value.stock = ['Stok wajib diisi.']
     if (!form.category_id) localErrors.value.category_id = ['Category wajib dipilih.']
     if (!form.brand_id) localErrors.value.brand_id = ['Brand wajib dipilih.']
     if (!form.gender_id) localErrors.value.gender_id = ['Gender wajib dipilih.']

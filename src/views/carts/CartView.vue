@@ -22,9 +22,7 @@ const handleCheckout = () => {
     <!-- Page Header -->
     <div class="mb-10">
       <h1 class="text-3xl font-bold text-black">Shopping Cart</h1>
-      <p class="mt-1 text-sm text-gray-400">
-        Review your selected products before checkout
-      </p>
+      <p class="mt-1 text-sm text-gray-400">Review your selected products before checkout</p>
     </div>
 
     <!-- Empty Cart -->
@@ -36,7 +34,7 @@ const handleCheckout = () => {
       <section class="space-y-5 lg:col-span-2">
         <CartItem
           v-for="item in cartStore.items"
-          :key="item.product.id"
+          :key="cartStore.getItemKey(item)"
           :item="item"
           @decrease="cartStore.decreaseQuantity"
           @increase="cartStore.increaseQuantity"

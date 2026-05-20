@@ -8,7 +8,11 @@ defineProps<{
 }>()
 
 const formatPrice = (price: number) =>
-  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price)
+  new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(price)
 </script>
 
 <template>
@@ -35,7 +39,10 @@ const formatPrice = (price: number) =>
           </button>
         </div>
         <div>
-          <p v-if="product.brand" class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">
+          <p
+            v-if="product.brand"
+            class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-0.5"
+          >
             {{ product.brand.name }}
           </p>
           <h3 class="text-sm font-semibold text-black mb-1 line-clamp-1">{{ product.name }}</h3>

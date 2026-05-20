@@ -3,7 +3,7 @@ import { Star, Send } from '@lucide/vue'
 import { RouterLink } from 'vue-router'
 import type { Review } from '@/services/reviewService'
 
-const props = defineProps<{
+defineProps<{
   avgRating: number
   reviewCount: number
   ratingStars: string[]
@@ -32,16 +32,14 @@ const formatDate = (dateStr: string) =>
 <template>
   <section class="py-12 border-t border-gray-100">
     <div class="flex flex-col lg:flex-row gap-12">
-
       <!-- Left: Summary + Form -->
       <div class="lg:w-80 flex-shrink-0">
-
         <!-- Rating Summary -->
         <div class="mb-8">
           <h2 class="text-xl font-bold text-black mb-5">Customer Reviews</h2>
           <div class="flex items-end gap-4 mb-3">
             <span class="text-5xl font-black text-black leading-none">
-              {{ avgRating > 0 ? avgRating.toFixed(1) : '—' }}
+              {{ avgRating > 0 ? avgRating.toFixed(1) : '-' }}
             </span>
             <div class="flex flex-col gap-1 pb-1">
               <div class="flex gap-0.5">
@@ -62,13 +60,15 @@ const formatDate = (dateStr: string) =>
 
         <!-- Write a Review -->
         <div v-if="isLoggedIn">
-          <h3 class="text-sm font-bold text-black mb-4 uppercase tracking-widest">Write a Review</h3>
+          <h3 class="text-sm font-bold text-black mb-4 uppercase tracking-widest">
+            Write a Review
+          </h3>
 
           <div
             v-if="submitSuccess"
             class="bg-green-50 border border-green-200 rounded-xl p-4 text-sm text-green-700 font-medium"
           >
-            ✓ Review submitted successfully!
+            Review submitted successfully!
           </div>
 
           <form v-else @submit.prevent="emit('submit')" class="flex flex-col gap-4">
@@ -96,7 +96,9 @@ const formatDate = (dateStr: string) =>
 
             <!-- Comment -->
             <div>
-              <label class="text-xs font-semibold text-gray-500 block mb-2">Comment (optional)</label>
+              <label class="text-xs font-semibold text-gray-500 block mb-2"
+                >Comment (optional)</label
+              >
               <textarea
                 :value="newComment"
                 @input="emit('update:newComment', ($event.target as HTMLTextAreaElement).value)"
@@ -132,9 +134,10 @@ const formatDate = (dateStr: string) =>
 
       <!-- Right: Review List -->
       <div class="flex-1">
-
         <div v-if="reviewsLoading" class="flex justify-center py-12">
-          <div class="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-black"></div>
+          <div
+            class="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-black"
+          ></div>
         </div>
 
         <div
@@ -165,11 +168,12 @@ const formatDate = (dateStr: string) =>
               </div>
             </div>
             <!-- Comment -->
-            <p v-if="review.comment" class="text-sm text-gray-600 leading-relaxed">{{ review.comment }}</p>
+            <p v-if="review.comment" class="text-sm text-gray-600 leading-relaxed">
+              {{ review.comment }}
+            </p>
             <p v-else class="text-xs text-gray-400 italic">No comment provided.</p>
           </div>
         </div>
-
       </div>
     </div>
   </section>

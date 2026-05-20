@@ -10,7 +10,9 @@ defineProps<{
 </script>
 
 <template>
-  <div class="bg-surface-container-lowest rounded-lg shadow-sm border border-surface-container-high p-6 flex flex-col">
+  <div
+    class="bg-surface-container-lowest rounded-lg shadow-sm border border-surface-container-high p-6 flex flex-col"
+  >
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-xl font-bold text-on-background flex items-center gap-2">
         <span class="material-symbols-outlined text-secondary-container">warning</span>
@@ -44,9 +46,11 @@ defineProps<{
         <div class="text-right shrink-0">
           <span
             class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold"
-            :class="item.count <= 5
-              ? 'bg-error-container text-on-error-container'
-              : 'bg-surface-container-highest text-on-surface'"
+            :class="
+              item.count <= 5
+                ? 'bg-error-container text-on-error-container'
+                : 'bg-surface-container-highest text-on-surface'
+            "
           >
             {{ item.count }} Left
           </span>

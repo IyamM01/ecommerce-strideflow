@@ -1,48 +1,72 @@
-# ecommerce
+# StrideFlow Ecommerce
 
-This template should help get you started developing with Vue 3 in Vite.
+Frontend ecommerce berbasis Vue 3, TypeScript, Pinia, Vue Router, Tailwind CSS v4, Axios, dan checkout Xendit melalui API backend.
 
-## Recommended IDE Setup
+## Aspek Penilaian
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Recommended Browser Setup
-
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
+| Aspek | Implementasi |
+| --- | --- |
+| Implementasi Vue.js & TypeScript | Menggunakan Composition API, typed route meta, typed API payload, reusable utility response, dan `vue-tsc` untuk validasi tipe. |
+| UI/UX dan Tailwind CSS | Responsive layout, navbar mobile, search produk, state loading/error/empty, Tailwind theme token, serta komponen cart/checkout/payment yang konsisten. |
+| Routing dan Navigasi | Lazy-loaded route, auth/admin guard, guest redirect, scroll reset, dynamic document title, dan halaman 404. |
+| State Management (Pinia) | Store auth, cart, product, dashboard, dan checkout. Cart mendukung varian warna/ukuran, product store mengelola filter dan pencarian, checkout store mengelola invoice Xendit. |
+| API Integration (Axios) | Axios instance terpusat, base URL dari environment, bearer token interceptor, 401 cleanup, dan helper error/response. |
+| Integrasi Payment Gateway Xendit | Checkout membuat invoice via endpoint `/checkout`, mengambil `payment_url`/`invoice_url`, redirect ke Xendit, dan halaman result membaca query status pembayaran. |
+| Clean Code & Maintainability | Struktur modular `components`, `views`, `stores`, `services`, `types`, `utils`, dan dokumentasi environment. |
 
 ## Project Setup
 
 ```sh
 npm install
+cp .env.example .env
 ```
 
-### Compile and Hot-Reload for Development
+Sesuaikan `VITE_API_BASE_URL` dengan backend Laravel/API yang menyediakan endpoint ecommerce dan Xendit.
+
+## Development
 
 ```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+## Build dan Validasi
 
 ```sh
+npm run type-check
 npm run build
+npm run lint
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+## Endpoint Backend yang Diharapkan
 
-```sh
-npm run lint
+Frontend memakai prefix API dari `VITE_API_BASE_URL`.
+
+| Flow | Endpoint |
+| --- | --- |
+| Auth | `POST /login`, `POST /register`, `POST /logout`, `GET /me` |
+| Product | `GET /products`, `GET /products/:id`, CRUD admin product |
+| Master data | `GET /categories`, `GET /brands`, `GET /genders` |
+| Cart/Checkout | `POST /checkout` |
+| Admin | `GET /dashboard`, `GET /orders`, CRUD users/products |
+
+Response checkout sebaiknya mengembalikan salah satu field berikut:
+
+```json
+{
+  "payment_url": "https://checkout.xendit.co/...",
+  "invoice_id": "inv-xxx",
+  "external_id": "order-xxx",
+  "status": "PENDING"
+}
+```
+
+atau:
+
+```json
+{
+  "data": {
+    "invoice_url": "https://checkout.xendit.co/...",
+    "invoice_id": "inv-xxx"
+  }
+}
 ```

@@ -1,15 +1,33 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import Navbar from '@/components/NavBar.vue'
 import Footer from '@/components/Footer.vue'
+import { useCheckoutStore } from '@/stores/checkoutStore'
+import { parsePaymentResultQuery } from '@/utils/paymentResult'
 import { XCircle, RefreshCcw, Home } from '@lucide/vue'
 
+const route = useRoute()
 const router = useRouter()
+const checkoutStore = useCheckoutStore()
+
+const paymentResult = computed(() => parsePaymentResultQuery(route.query, 'FAILED'))
+const paymentDetails = computed(() =>
+  [
+    { label: 'Status', value: paymentResult.value.status },
+    { label: 'Invoice ID', value: paymentResult.value.invoiceId },
+    { label: 'External ID', value: paymentResult.value.externalId },
+  ].filter((item) => item.value),
+)
+
+onMounted(() => {
+  checkoutStore.setPaymentResult(paymentResult.value)
+})
 </script>
 
 <template>
   <Navbar />
-  
+
   <main class="mx-auto min-h-[70vh] flex items-center justify-center px-6 py-20">
     <div class="max-w-md w-full text-center">
       <div class="mb-8 flex justify-center">
@@ -18,24 +36,39 @@ const router = useRouter()
           <XCircle class="relative w-24 h-24 text-red-500" />
         </div>
       </div>
-      
+
       <h1 class="text-3xl font-bold text-gray-900 mb-4">Pembayaran Gagal</h1>
       <p class="text-gray-600 mb-10 leading-relaxed">
-        Maaf, terjadi masalah saat memproses pembayaran Anda. Silakan coba lagi atau hubungi layanan pelanggan kami jika masalah berlanjut.
+        Maaf, terjadi masalah saat memproses pembayaran Anda. Silakan coba lagi atau hubungi layanan
+        pelanggan kami jika masalah berlanjut.
       </p>
-      
+
+      <div
+        v-if="paymentDetails.length > 0"
+        class="mb-8 rounded-lg border border-red-100 bg-red-50 p-4 text-left"
+      >
+        <div
+          v-for="detail in paymentDetails"
+          :key="detail.label"
+          class="flex items-center justify-between gap-4 py-1 text-sm"
+        >
+          <span class="text-gray-500">{{ detail.label }}</span>
+          <span class="font-semibold text-gray-900">{{ detail.value }}</span>
+        </div>
+      </div>
+
       <div class="grid gap-4">
-        <button 
+        <button
           @click="router.push('/cart')"
-          class="flex items-center justify-center gap-2 w-full bg-black text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition-all"
+          class="flex items-center justify-center gap-2 w-full bg-black text-white py-4 rounded-lg font-semibold hover:bg-gray-800 transition-all"
         >
           Coba Lagi
           <RefreshCcw class="w-5 h-5" />
         </button>
-        
-        <button 
+
+        <button
           @click="router.push('/')"
-          class="flex items-center justify-center gap-2 w-full bg-white text-gray-900 border border-gray-200 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-all"
+          class="flex items-center justify-center gap-2 w-full bg-white text-gray-900 border border-gray-200 py-4 rounded-lg font-semibold hover:bg-gray-50 transition-all"
         >
           Kembali ke Beranda
           <Home class="w-5 h-5" />

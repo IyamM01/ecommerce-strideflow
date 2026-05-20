@@ -32,12 +32,13 @@ const handleSubmit = async () => {
       email: email.value,
       phone: '',
       password: password.value,
-      password_confirmation: confirmPassword.value
+      password_confirmation: confirmPassword.value,
     })
 
-    const redirectPath = typeof route.query.redirect === 'string'
-      ? route.query.redirect
-      : authService.getRedirectPath(user.role)
+    const redirectPath =
+      typeof route.query.redirect === 'string'
+        ? route.query.redirect
+        : authService.getRedirectPath(user.role)
     router.push(redirectPath)
   } catch (err: unknown) {
     console.error('Registration failed:', err)

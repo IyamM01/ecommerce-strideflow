@@ -7,7 +7,9 @@ defineProps<{
 </script>
 
 <template>
-  <div class="rounded-3xl border border-surface-container-high bg-surface-container-lowest p-6 shadow-sm">
+  <div
+    class="rounded-3xl border border-surface-container-high bg-surface-container-lowest p-6 shadow-sm"
+  >
     <div class="flex items-start justify-between gap-4">
       <div>
         <p class="text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant">

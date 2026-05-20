@@ -30,5 +30,5 @@ export const authService = {
 
   getRedirectPath(role?: string): string {
     return role === 'admin' ? '/admin' : '/'
-  }
+  },
 }

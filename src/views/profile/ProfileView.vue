@@ -8,6 +8,7 @@ import ProfileEditForm from '@/components/profile/ProfileEditForm.vue'
 import ProfileRecentOrders from '@/components/profile/ProfileRecentOrders.vue'
 import ProfileSummaryCard from '@/components/profile/ProfileSummaryCard.vue'
 import { useProfilePage } from '@/composables/useProfilePage'
+import type { ProfileFormValues } from '@/types/profile'
 
 const route = useRoute()
 const ordersSection = ref<HTMLElement | null>(null)
@@ -31,6 +32,10 @@ const {
 onMounted(() => {
   loadProfilePage()
 })
+
+const updateProfileFormField = (field: keyof ProfileFormValues, value: string) => {
+  form[field] = value
+}
 </script>
 
 <template>
@@ -38,7 +43,9 @@ onMounted(() => {
 
   <main class="min-h-screen bg-background px-6 py-10 lg:px-10">
     <div class="mx-auto max-w-7xl">
-      <header class="mb-8 flex flex-col gap-4 border-b border-outline-variant pb-4 md:flex-row md:items-end md:justify-between">
+      <header
+        class="mb-8 flex flex-col gap-4 border-b border-outline-variant pb-4 md:flex-row md:items-end md:justify-between"
+      >
         <div>
           <h1 class="text-3xl font-bold text-on-background">Account Profile</h1>
           <p class="mt-2 text-sm text-on-surface-variant">
@@ -46,7 +53,9 @@ onMounted(() => {
           </p>
         </div>
 
-        <div class="inline-flex items-center gap-2 rounded-xl bg-secondary-container px-5 py-3 text-sm font-semibold text-white">
+        <div
+          class="inline-flex items-center gap-2 rounded-xl bg-secondary-container px-5 py-3 text-sm font-semibold text-white"
+        >
           <span class="material-symbols-outlined text-[18px]">verified_user</span>
           {{ profile?.role === 'admin' ? 'Admin Account' : 'Customer Account' }}
         </div>
@@ -60,11 +69,17 @@ onMounted(() => {
       </div>
 
       <template v-else>
-        <div v-if="error" class="mb-6 rounded-2xl border border-error/20 bg-error-container px-5 py-4 text-sm text-on-error-container">
+        <div
+          v-if="error"
+          class="mb-6 rounded-2xl border border-error/20 bg-error-container px-5 py-4 text-sm text-on-error-container"
+        >
           {{ error }}
         </div>
 
-        <div v-if="successMessage" class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-800">
+        <div
+          v-if="successMessage"
+          class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-800"
+        >
           {{ successMessage }}
         </div>
 
@@ -83,6 +98,7 @@ onMounted(() => {
             :saving="saving"
             @discard="handleDiscard"
             @submit="handleSubmit"
+            @update-field="updateProfileFormField"
           />
         </div>
 

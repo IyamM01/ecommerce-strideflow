@@ -9,51 +9,67 @@ defineProps<{
 const emit = defineEmits<{
   submit: []
   discard: []
+  updateField: [field: keyof ProfileFormValues, value: string]
 }>()
+
+const updateField = (field: keyof ProfileFormValues, event: Event) => {
+  emit('updateField', field, (event.target as HTMLInputElement).value)
+}
 </script>
 
 <template>
-  <section class="rounded-3xl border border-surface-container-high bg-surface-container-lowest p-8 shadow-sm lg:col-span-8">
+  <section
+    class="rounded-3xl border border-surface-container-high bg-surface-container-lowest p-8 shadow-sm lg:col-span-8"
+  >
     <h2 class="text-2xl font-bold text-on-background">Edit Details</h2>
 
-    <form class="mt-6 grid grid-cols-1 gap-x-gutter gap-y-5 md:grid-cols-2" @submit.prevent="emit('submit')">
+    <form
+      class="mt-6 grid grid-cols-1 gap-x-gutter gap-y-5 md:grid-cols-2"
+      @submit.prevent="emit('submit')"
+    >
       <div class="grid gap-2">
         <label class="text-sm font-semibold text-on-surface-variant">First Name</label>
         <input
-          v-model="form.firstName"
+          :value="form.firstName"
           type="text"
           class="min-h-12 rounded-xl border border-outline-variant bg-surface px-4 py-3 text-sm text-on-surface outline-none transition focus:border-primary"
+          @input="updateField('firstName', $event)"
         />
       </div>
 
       <div class="grid gap-2">
         <label class="text-sm font-semibold text-on-surface-variant">Last Name</label>
         <input
-          v-model="form.lastName"
+          :value="form.lastName"
           type="text"
           class="min-h-12 rounded-xl border border-outline-variant bg-surface px-4 py-3 text-sm text-on-surface outline-none transition focus:border-primary"
+          @input="updateField('lastName', $event)"
         />
       </div>
 
       <div class="grid gap-2 md:col-span-2">
         <label class="text-sm font-semibold text-on-surface-variant">Email Address</label>
         <input
-          v-model="form.email"
+          :value="form.email"
           type="email"
           class="min-h-12 rounded-xl border border-outline-variant bg-surface px-4 py-3 text-sm text-on-surface outline-none transition focus:border-primary"
+          @input="updateField('email', $event)"
         />
       </div>
 
       <div class="grid gap-2 md:col-span-2">
         <label class="text-sm font-semibold text-on-surface-variant">Phone Number</label>
         <input
-          v-model="form.phone"
+          :value="form.phone"
           type="tel"
           class="min-h-12 rounded-xl border border-outline-variant bg-surface px-4 py-3 text-sm text-on-surface outline-none transition focus:border-primary"
+          @input="updateField('phone', $event)"
         />
       </div>
 
-      <div class="mt-2 flex flex-col-reverse gap-3 border-t border-outline-variant pt-6 md:col-span-2 sm:flex-row sm:justify-end">
+      <div
+        class="mt-2 flex flex-col-reverse gap-3 border-t border-outline-variant pt-6 md:col-span-2 sm:flex-row sm:justify-end"
+      >
         <button
           type="button"
           class="min-h-12 px-6 py-3 text-sm font-semibold text-on-surface-variant transition hover:text-on-surface"

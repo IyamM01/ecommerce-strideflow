@@ -15,7 +15,9 @@ const emit = defineEmits<{
 <template>
   <div class="col-span-1 lg:col-span-7 flex flex-col gap-3">
     <!-- Main Image -->
-    <div class="w-full bg-[#F6F6F6] rounded-2xl overflow-hidden relative aspect-[4/5] md:h-[680px] md:aspect-auto shadow-sm">
+    <div
+      class="w-full bg-[#F6F6F6] rounded-2xl overflow-hidden relative aspect-[4/5] md:h-[680px] md:aspect-auto shadow-sm"
+    >
       <img
         :src="images[selectedIndex]"
         :alt="productName"

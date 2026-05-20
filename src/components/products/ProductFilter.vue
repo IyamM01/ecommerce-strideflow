@@ -3,21 +3,22 @@ import { ref, onMounted, computed } from 'vue'
 import { categoryService } from '@/services/categoryService'
 import { brandService } from '@/services/brandService'
 import type { Category } from '@/types/category'
-// Assuming a Brand type exists or using any for now, but better to define it if possible. We'll just use any[] or inline type for brevity.
+import type { ProductRelation } from '@/types/product'
 import { useProductStore } from '@/stores/productStore'
+import { unwrapCollection } from '@/utils/apiResponse'
 
 const productStore = useProductStore()
 const categories = ref<Category[]>([])
-const brands = ref<{id: number, name: string}[]>([])
+const brands = ref<ProductRelation[]>([])
 
 onMounted(async () => {
   try {
     const [catData, brandData] = await Promise.all([
       categoryService.getAll(),
-      brandService.getAll()
+      brandService.getAll(),
     ])
-    categories.value = catData.data ?? catData
-    brands.value = brandData.data ?? brandData
+    categories.value = unwrapCollection<Category>(catData)
+    brands.value = unwrapCollection<ProductRelation>(brandData)
   } catch (error) {
     console.error('Failed to fetch filter data:', error)
   }
@@ -94,7 +95,7 @@ const availableColors = computed(() => {
         </label>
       </div>
     </div>
-    
+
     <!-- Brands -->
     <div>
       <h3 class="text-base font-semibold text-gray-900 mb-4">Brands</h3>

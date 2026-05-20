@@ -5,21 +5,33 @@ import type { CartItem, CartProduct } from '@/types/cart'
 
 export const useCartStore = defineStore('cart', () => {
   const items = ref<CartItem[]>(cartService.getCart())
+  const getItemKey = (item: CartItem) => {
+    return [item.product.id, item.color ?? 'default-color', item.size ?? 'default-size'].join(':')
+  }
+
+  const findCartItem = (productId: number, color?: string | null, size?: string | null) => {
+    return items.value.find(
+      (item) =>
+        item.product.id === productId &&
+        (item.color ?? null) === (color ?? null) &&
+        (item.size ?? null) === (size ?? null),
+    )
+  }
 
   const saveCart = () => {
     cartService.saveCart(items.value)
   }
 
-  const addToCart = (product: CartProduct, quantity: number = 1, color?: string | null, size?: string | null) => {
-    const existingItem = items.value.find(
-      (item) => 
-        item.product.id === product.id && 
-        item.color === color && 
-        item.size === size
-    )
+  const addToCart = (
+    product: CartProduct,
+    quantity: number = 1,
+    color?: string | null,
+    size?: string | null,
+  ) => {
+    const existingItem = findCartItem(product.id, color, size)
 
     if (existingItem) {
-      if (product.stock && (existingItem.quantity + quantity) > product.stock) {
+      if (product.stock && existingItem.quantity + quantity > product.stock) {
         existingItem.quantity = product.stock
       } else {
         existingItem.quantity += quantity
@@ -29,25 +41,28 @@ export const useCartStore = defineStore('cart', () => {
         product,
         quantity,
         color: color || undefined,
-        size: size || undefined
+        size: size || undefined,
       })
     }
 
     saveCart()
   }
 
-  const removeFromCart = (productId: number) => {
+  const removeFromCart = (productId: number, color?: string | null, size?: string | null) => {
     items.value = items.value.filter(
-      (item) => item.product.id !== productId
+      (item) =>
+        !(
+          item.product.id === productId &&
+          (item.color ?? null) === (color ?? null) &&
+          (item.size ?? null) === (size ?? null)
+        ),
     )
 
     saveCart()
   }
 
-  const increaseQuantity = (productId: number) => {
-    const item = items.value.find(
-      (item) => item.product.id === productId
-    )
+  const increaseQuantity = (productId: number, color?: string | null, size?: string | null) => {
+    const item = findCartItem(productId, color, size)
 
     if (!item) return
 
@@ -59,10 +74,8 @@ export const useCartStore = defineStore('cart', () => {
     saveCart()
   }
 
-  const decreaseQuantity = (productId: number) => {
-    const item = items.value.find(
-      (item) => item.product.id === productId
-    )
+  const decreaseQuantity = (productId: number, color?: string | null, size?: string | null) => {
+    const item = findCartItem(productId, color, size)
 
     if (!item) return
 
@@ -70,7 +83,7 @@ export const useCartStore = defineStore('cart', () => {
       item.quantity--
       saveCart()
     } else {
-      removeFromCart(productId)
+      removeFromCart(productId, color, size)
     }
   }
 
@@ -98,5 +111,6 @@ export const useCartStore = defineStore('cart', () => {
     increaseQuantity,
     decreaseQuantity,
     clearCart,
+    getItemKey,
   }
 })

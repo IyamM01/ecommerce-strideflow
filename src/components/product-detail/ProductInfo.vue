@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { Star, Heart, ShoppingBag, Minus, Plus, ChevronDown } from '@lucide/vue'
 import type { Product } from '@/types/product'
 
@@ -27,7 +26,11 @@ const emit = defineEmits<{
 }>()
 
 const formatPrice = (price: number) =>
-  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price)
+  new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(price)
 
 const decreaseQty = () => {
   if (props.quantity > 1) emit('update:quantity', props.quantity - 1)
@@ -37,10 +40,12 @@ const increaseQty = () => emit('update:quantity', props.quantity + 1)
 
 <template>
   <div class="col-span-1 lg:col-span-5 flex flex-col pt-2">
-
     <!-- Brand & Name -->
     <div class="mb-6">
-      <p v-if="product.brand" class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">
+      <p
+        v-if="product.brand"
+        class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2"
+      >
         {{ product.brand.name }}
       </p>
       <h1 class="text-3xl font-bold text-black leading-tight mb-4">{{ product.name }}</h1>
@@ -56,7 +61,9 @@ const increaseQty = () => emit('update:quantity', props.quantity + 1)
             />
           </template>
         </div>
-        <span class="text-sm font-bold text-black">{{ avgRating > 0 ? avgRating.toFixed(1) : '—' }}</span>
+        <span class="text-sm font-bold text-black">{{
+          avgRating > 0 ? avgRating.toFixed(1) : '-'
+        }}</span>
         <span class="text-xs font-semibold text-gray-400">
           {{ reviewCount }} {{ reviewCount === 1 ? 'Review' : 'Reviews' }}
         </span>
@@ -93,7 +100,11 @@ const increaseQty = () => emit('update:quantity', props.quantity + 1)
     <div v-if="uniqueSizes.length > 0" class="mb-8">
       <div class="flex justify-between items-center mb-3">
         <span class="text-xs font-bold uppercase tracking-widest text-black">Size</span>
-        <a href="#" class="text-xs font-semibold text-gray-400 hover:text-black underline underline-offset-4 transition-colors">Size Guide</a>
+        <a
+          href="#"
+          class="text-xs font-semibold text-gray-400 hover:text-black underline underline-offset-4 transition-colors"
+          >Size Guide</a
+        >
       </div>
       <div class="flex flex-wrap gap-2">
         <button
@@ -116,7 +127,9 @@ const increaseQty = () => emit('update:quantity', props.quantity + 1)
     <div class="flex flex-col gap-3 mb-8">
       <div class="flex gap-3">
         <!-- Quantity -->
-        <div class="flex items-center justify-between border border-gray-200 rounded-xl bg-white h-12 px-2 w-32">
+        <div
+          class="flex items-center justify-between border border-gray-200 rounded-xl bg-white h-12 px-2 w-32"
+        >
           <button @click="decreaseQty" class="p-2 text-gray-400 hover:text-black transition-colors">
             <Minus :size="16" />
           </button>
@@ -127,7 +140,7 @@ const increaseQty = () => emit('update:quantity', props.quantity + 1)
         </div>
 
         <!-- Add to Cart -->
-        <button 
+        <button
           @click="emit('addToCart')"
           class="flex-1 h-12 bg-black text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-gray-800 transition-all duration-300 shadow-lg shadow-black/10 flex items-center justify-center gap-2"
         >
@@ -137,7 +150,7 @@ const increaseQty = () => emit('update:quantity', props.quantity + 1)
       </div>
 
       <!-- Buy Now -->
-      <button 
+      <button
         @click="emit('buyNow')"
         class="w-full h-12 bg-white text-black border-2 border-black text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-black hover:text-white transition-all duration-300 flex items-center justify-center"
       >
@@ -149,14 +162,17 @@ const increaseQty = () => emit('update:quantity', props.quantity + 1)
         @click="emit('update:wishlist', !wishlist)"
         class="w-full py-3 flex items-center justify-center gap-2 text-gray-400 hover:text-black transition-colors text-xs font-semibold uppercase tracking-wider"
       >
-        <Heart :size="16" :fill="wishlist ? 'currentColor' : 'none'" :class="wishlist ? 'text-red-500' : ''" />
+        <Heart
+          :size="16"
+          :fill="wishlist ? 'currentColor' : 'none'"
+          :class="wishlist ? 'text-red-500' : ''"
+        />
         {{ wishlist ? 'Wishlisted' : 'Add to Wishlist' }}
       </button>
     </div>
 
     <!-- Accordion -->
     <div class="border-t border-gray-100 mt-auto">
-
       <!-- Description -->
       <div class="border-b border-gray-100">
         <button
@@ -164,9 +180,16 @@ const increaseQty = () => emit('update:quantity', props.quantity + 1)
           class="w-full flex justify-between items-center py-4 text-sm font-semibold text-black text-left"
         >
           Description
-          <ChevronDown :size="18" class="text-gray-400 transition-transform duration-300" :class="openSections.description ? 'rotate-180' : ''" />
+          <ChevronDown
+            :size="18"
+            class="text-gray-400 transition-transform duration-300"
+            :class="openSections.description ? 'rotate-180' : ''"
+          />
         </button>
-        <div v-if="openSections.description" class="pb-4 text-sm text-gray-500 leading-relaxed space-y-2">
+        <div
+          v-if="openSections.description"
+          class="pb-4 text-sm text-gray-500 leading-relaxed space-y-2"
+        >
           <p>{{ product.description }}</p>
           <ul class="list-disc pl-5 space-y-1 text-xs">
             <li>Premium quality materials</li>
@@ -183,12 +206,18 @@ const increaseQty = () => emit('update:quantity', props.quantity + 1)
           class="w-full flex justify-between items-center py-4 text-sm font-semibold text-black text-left"
         >
           Details & Fit
-          <ChevronDown :size="18" class="text-gray-400 transition-transform duration-300" :class="openSections.details ? 'rotate-180' : ''" />
+          <ChevronDown
+            :size="18"
+            class="text-gray-400 transition-transform duration-300"
+            :class="openSections.details ? 'rotate-180' : ''"
+          />
         </button>
         <div v-if="openSections.details" class="pb-4 text-sm text-gray-500 leading-relaxed">
           <p>Relaxed, true-to-size fit. See size guide for detailed measurements.</p>
           <p v-if="product.sku" class="mt-2 text-xs text-gray-400">SKU: {{ product.sku }}</p>
-          <p v-if="product.stock" class="mt-1 text-xs text-gray-400">{{ product.stock }} units in stock</p>
+          <p v-if="product.stock" class="mt-1 text-xs text-gray-400">
+            {{ product.stock }} units in stock
+          </p>
         </div>
       </div>
 
@@ -199,13 +228,19 @@ const increaseQty = () => emit('update:quantity', props.quantity + 1)
           class="w-full flex justify-between items-center py-4 text-sm font-semibold text-black text-left"
         >
           Shipping & Returns
-          <ChevronDown :size="18" class="text-gray-400 transition-transform duration-300" :class="openSections.shipping ? 'rotate-180' : ''" />
+          <ChevronDown
+            :size="18"
+            class="text-gray-400 transition-transform duration-300"
+            :class="openSections.shipping ? 'rotate-180' : ''"
+          />
         </button>
         <div v-if="openSections.shipping" class="pb-4 text-sm text-gray-500 leading-relaxed">
-          <p>Free standard shipping on orders over Rp 500.000. Returns accepted within 30 days in original condition.</p>
+          <p>
+            Free standard shipping on orders over Rp 500.000. Returns accepted within 30 days in
+            original condition.
+          </p>
         </div>
       </div>
-
     </div>
   </div>
 </template>

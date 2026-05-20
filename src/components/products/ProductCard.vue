@@ -94,10 +94,7 @@ const handleAddToCart = () => {
           </h3>
         </RouterLink>
 
-        <p
-          v-if="productSubtitle"
-          class="line-clamp-1 text-xs font-medium text-gray-400"
-        >
+        <p v-if="productSubtitle" class="line-clamp-1 text-xs font-medium text-gray-400">
           {{ productSubtitle }}
         </p>
       </div>

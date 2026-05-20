@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cartStore'
 import { useAuthStore } from '@/stores/authStore'
-import { checkoutService } from '@/services/checkoutService'
+import { useCheckoutStore } from '@/stores/checkoutStore'
 import Navbar from '@/components/NavBar.vue'
 import Footer from '@/components/Footer.vue'
 import { CreditCard, Truck, User, Phone, Mail, MapPin, Loader2 } from '@lucide/vue'
+import { formatCurrency } from '@/utils/formatCurrency'
+import type { CheckoutPayload } from '@/types/payment'
 
 const cartStore = useCartStore()
 const authStore = useAuthStore()
-const router = useRouter()
+const checkoutStore = useCheckoutStore()
 
-const isLoading = ref(false)
 const error = ref<string | null>(null)
 
 const form = ref({
@@ -24,53 +24,38 @@ const form = ref({
 
 const isFormValid = computed(() => {
   return (
-    form.value.customer_name &&
-    form.value.customer_email &&
-    form.value.customer_phone &&
-    form.value.shipping_address &&
+    form.value.customer_name.trim() &&
+    form.value.customer_email.trim() &&
+    form.value.customer_phone.trim() &&
+    form.value.shipping_address.trim() &&
     cartStore.items.length > 0
   )
 })
 
+const checkoutPayload = computed<CheckoutPayload>(() => ({
+  customer_name: form.value.customer_name.trim(),
+  customer_email: form.value.customer_email.trim(),
+  customer_phone: form.value.customer_phone.trim(),
+  shipping_address: form.value.shipping_address.trim(),
+  items: cartStore.items.map((item) => ({
+    product_id: item.product.id,
+    quantity: item.quantity,
+    price: item.product.price,
+  })),
+}))
+
 const handleCheckout = async () => {
   if (!isFormValid.value) return
 
-  isLoading.value = true
   error.value = null
 
   try {
-    const payload = {
-      ...form.value,
-      items: cartStore.items.map((item) => ({
-        product_id: item.product.id,
-        quantity: item.quantity,
-        price: item.product.price,
-      })),
-    }
-
-    const response = await checkoutService.processCheckout(payload)
-
-    if (response.payment_url) {
-      // Clear cart before redirecting
-      cartStore.clearCart()
-      window.location.href = response.payment_url
-    } else {
-      throw new Error('Gagal mendapatkan URL pembayaran')
-    }
-  } catch (err: any) {
-    console.error(err)
-    error.value = err.response?.data?.message || 'Terjadi kesalahan saat checkout. Silakan coba lagi.'
-  } finally {
-    isLoading.value = false
+    const { redirectUrl } = await checkoutStore.createInvoice(checkoutPayload.value)
+    cartStore.clearCart()
+    window.location.assign(redirectUrl)
+  } catch {
+    error.value = checkoutStore.error
   }
-}
-
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-  }).format(value)
 }
 </script>
 
@@ -83,15 +68,18 @@ const formatCurrency = (value: number) => {
       <p class="mt-1 text-sm text-gray-500">Selesaikan pesanan Anda</p>
     </div>
 
-    <div v-if="cartStore.items.length === 0" class="flex flex-col items-center justify-center py-20">
-       <p class="text-lg text-gray-500">Keranjang Anda kosong</p>
-       <RouterLink to="/" class="mt-4 text-blue-600 hover:underline">Kembali Belanja</RouterLink>
+    <div
+      v-if="cartStore.items.length === 0"
+      class="flex flex-col items-center justify-center py-20"
+    >
+      <p class="text-lg text-gray-500">Keranjang Anda kosong</p>
+      <RouterLink to="/" class="mt-4 text-blue-600 hover:underline">Kembali Belanja</RouterLink>
     </div>
 
     <div v-else class="grid gap-12 lg:grid-cols-2">
       <!-- Checkout Form -->
       <section class="space-y-8">
-        <div class="rounded-2xl bg-white p-8 shadow-sm border border-gray-100">
+        <div class="rounded-lg bg-white p-8 shadow-sm border border-gray-100">
           <h2 class="flex items-center gap-2 text-xl font-semibold mb-6">
             <User class="w-5 h-5 text-blue-600" />
             Informasi Pelanggan
@@ -146,7 +134,7 @@ const formatCurrency = (value: number) => {
           </div>
         </div>
 
-        <div class="rounded-2xl bg-white p-8 shadow-sm border border-gray-100">
+        <div class="rounded-lg bg-white p-8 shadow-sm border border-gray-100">
           <h2 class="flex items-center gap-2 text-xl font-semibold mb-6">
             <Truck class="w-5 h-5 text-blue-600" />
             Alamat Pengiriman
@@ -171,18 +159,20 @@ const formatCurrency = (value: number) => {
 
       <!-- Order Summary -->
       <section>
-        <div class="sticky top-24 rounded-2xl bg-gray-50 p-8 border border-gray-200">
+        <div class="sticky top-24 rounded-lg bg-gray-50 p-8 border border-gray-200">
           <h2 class="text-xl font-semibold mb-6">Ringkasan Pesanan</h2>
 
           <div class="space-y-4 mb-6 max-h-[400px] overflow-y-auto pr-2">
             <div
               v-for="item in cartStore.items"
-              :key="item.product.id"
+              :key="cartStore.getItemKey(item)"
               class="flex gap-4"
             >
-              <div class="w-20 h-20 bg-white rounded-lg border border-gray-100 overflow-hidden flex-shrink-0">
+              <div
+                class="w-20 h-20 bg-white rounded-lg border border-gray-100 overflow-hidden flex-shrink-0"
+              >
                 <img
-                  :src="item.product.image_url"
+                  :src="item.product.image_url || 'https://placehold.co/160x160?text=No+Image'"
                   :alt="item.product.name"
                   class="w-full h-full object-cover"
                 />
@@ -193,8 +183,12 @@ const formatCurrency = (value: number) => {
                   <span v-if="item.color">Warna: {{ item.color }}</span>
                   <span v-if="item.size">Ukuran: {{ item.size }}</span>
                 </div>
-                <p class="text-xs text-gray-500 mt-0.5">{{ item.quantity }} x {{ formatCurrency(item.product.price) }}</p>
-                <p class="text-sm font-semibold text-gray-900 mt-1">{{ formatCurrency(item.product.price * item.quantity) }}</p>
+                <p class="text-xs text-gray-500 mt-0.5">
+                  {{ item.quantity }} x {{ formatCurrency(item.product.price) }}
+                </p>
+                <p class="text-sm font-semibold text-gray-900 mt-1">
+                  {{ formatCurrency(item.product.price * item.quantity) }}
+                </p>
               </div>
             </div>
           </div>
@@ -208,22 +202,27 @@ const formatCurrency = (value: number) => {
               <span>Biaya Pengiriman</span>
               <span class="text-green-600 font-medium">Gratis</span>
             </div>
-            <div class="flex justify-between text-lg font-bold text-gray-900 pt-3 border-t border-gray-200">
+            <div
+              class="flex justify-between text-lg font-bold text-gray-900 pt-3 border-t border-gray-200"
+            >
               <span>Total</span>
               <span>{{ formatCurrency(cartStore.totalPrice) }}</span>
             </div>
           </div>
 
-          <div v-if="error" class="mt-4 p-3 bg-red-50 border border-red-100 text-red-600 text-sm rounded-lg">
+          <div
+            v-if="error"
+            class="mt-4 p-3 bg-red-50 border border-red-100 text-red-600 text-sm rounded-lg"
+          >
             {{ error }}
           </div>
 
           <button
             @click="handleCheckout"
-            :disabled="!isFormValid || isLoading"
-            class="w-full mt-8 bg-black text-white py-4 rounded-xl font-semibold hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+            :disabled="!isFormValid || checkoutStore.isProcessing"
+            class="w-full mt-8 bg-black text-white py-4 rounded-lg font-semibold hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
           >
-            <Loader2 v-if="isLoading" class="w-5 h-5 animate-spin" />
+            <Loader2 v-if="checkoutStore.isProcessing" class="w-5 h-5 animate-spin" />
             <span v-else class="flex items-center gap-2">
               Bayar Sekarang
               <CreditCard class="w-5 h-5" />

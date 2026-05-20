@@ -6,15 +6,7 @@ import { genderService } from '@/services/genderService'
 import { productService } from '@/services/productService'
 import type { ProductRelation } from '@/types/product'
 import type { SelectOption } from '@/types/productForm'
-
-const unwrapCollection = <T,>(payload: unknown): T[] => {
-  if (Array.isArray(payload)) return payload as T[]
-  if (payload && typeof payload === 'object' && 'data' in payload) {
-    const data = (payload as { data?: unknown }).data
-    return Array.isArray(data) ? (data as T[]) : []
-  }
-  return []
-}
+import { unwrapCollection } from '@/utils/apiResponse'
 
 const uniqueById = (items: Array<ProductRelation | undefined>) =>
   items
@@ -23,7 +15,11 @@ const uniqueById = (items: Array<ProductRelation | undefined>) =>
     .sort((left, right) => left.name.localeCompare(right.name))
 
 const buildFallbackOptions = async () => {
-  const products = unwrapCollection<any>(await productService.getAll())
+  const products = unwrapCollection<{
+    category?: ProductRelation
+    brand?: ProductRelation
+    gender?: ProductRelation
+  }>(await productService.getAll())
 
   return {
     categories: uniqueById(products.map((product) => product.category)),
@@ -47,13 +43,11 @@ export const useProductOptions = () => {
       genderService.getAll(),
     ])
 
-    let fallbackOptions:
-      | {
-          categories: SelectOption[]
-          brands: SelectOption[]
-          genders: SelectOption[]
-        }
-      | null = null
+    let fallbackOptions: {
+      categories: SelectOption[]
+      brands: SelectOption[]
+      genders: SelectOption[]
+    } | null = null
 
     const needsFallback = [categoriesResult, brandsResult, gendersResult].some(
       (result) => result.status === 'rejected',
@@ -70,15 +64,15 @@ export const useProductOptions = () => {
     categoryOptions.value =
       categoriesResult.status === 'fulfilled'
         ? unwrapCollection<SelectOption>(categoriesResult.value)
-        : fallbackOptions?.categories ?? []
+        : (fallbackOptions?.categories ?? [])
     brandOptions.value =
       brandsResult.status === 'fulfilled'
         ? unwrapCollection<SelectOption>(brandsResult.value)
-        : fallbackOptions?.brands ?? []
+        : (fallbackOptions?.brands ?? [])
     genderOptions.value =
       gendersResult.status === 'fulfilled'
         ? unwrapCollection<SelectOption>(gendersResult.value)
-        : fallbackOptions?.genders ?? []
+        : (fallbackOptions?.genders ?? [])
   }
 
   onMounted(() => {

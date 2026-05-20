@@ -4,20 +4,23 @@ import { computed, reactive, watch } from 'vue'
 import type { AdminUserFormValues } from '@/types/adminUserForm'
 import type { UserPayload } from '@/types/user'
 
-const props = withDefaults(defineProps<{
-  title: string
-  description: string
-  submitLabel: string
-  loading?: boolean
-  initialValues?: Partial<AdminUserFormValues>
-  requirePassword?: boolean
-  error?: string | null
-}>(), {
-  loading: false,
-  initialValues: () => ({}),
-  requirePassword: true,
-  error: null,
-})
+const props = withDefaults(
+  defineProps<{
+    title: string
+    description: string
+    submitLabel: string
+    loading?: boolean
+    initialValues?: Partial<AdminUserFormValues>
+    requirePassword?: boolean
+    error?: string | null
+  }>(),
+  {
+    loading: false,
+    initialValues: () => ({}),
+    requirePassword: true,
+    error: null,
+  },
+)
 
 const emit = defineEmits<{
   submit: [payload: UserPayload]
@@ -37,10 +40,17 @@ const localError = computed(() => {
   if (!form.name.trim()) return 'Nama user wajib diisi.'
   if (!form.email.trim()) return 'Email user wajib diisi.'
   if (props.requirePassword && !form.password.trim()) return 'Password wajib diisi.'
-  if ((props.requirePassword || form.password.trim()) && form.password.length > 0 && form.password.length < 8) {
+  if (
+    (props.requirePassword || form.password.trim()) &&
+    form.password.length > 0 &&
+    form.password.length < 8
+  ) {
     return 'Password minimal 8 karakter.'
   }
-  if ((props.requirePassword || form.password.trim()) && form.password !== form.password_confirmation) {
+  if (
+    (props.requirePassword || form.password.trim()) &&
+    form.password !== form.password_confirmation
+  ) {
     return 'Konfirmasi password tidak cocok.'
   }
   return null
@@ -78,7 +88,9 @@ watch(
 </script>
 
 <template>
-  <div class="rounded-3xl border border-surface-container-high bg-surface-container-lowest shadow-sm overflow-hidden">
+  <div
+    class="rounded-3xl border border-surface-container-high bg-surface-container-lowest shadow-sm overflow-hidden"
+  >
     <div class="border-b border-surface-container-high px-8 py-6">
       <h1 class="text-3xl font-bold text-on-background">{{ title }}</h1>
       <p class="mt-2 text-sm text-on-surface-variant">{{ description }}</p>
@@ -157,7 +169,9 @@ watch(
         </div>
       </div>
 
-      <div class="flex flex-col-reverse gap-3 border-t border-surface-container-high pt-6 sm:flex-row sm:justify-end">
+      <div
+        class="flex flex-col-reverse gap-3 border-t border-surface-container-high pt-6 sm:flex-row sm:justify-end"
+      >
         <button
           type="button"
           class="rounded-2xl border border-surface-container-high px-5 py-3 text-sm font-semibold text-on-background transition hover:bg-surface-container-low"

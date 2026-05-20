@@ -26,9 +26,10 @@ const handleSubmit = async () => {
   try {
     const user = await authStore.login(form.value)
 
-    const redirectPath = typeof route.query.redirect === 'string'
-      ? route.query.redirect
-      : authService.getRedirectPath(user.role)
+    const redirectPath =
+      typeof route.query.redirect === 'string'
+        ? route.query.redirect
+        : authService.getRedirectPath(user.role)
     router.push(redirectPath)
   } catch (err: unknown) {
     console.error('Login failed:', err)
@@ -72,7 +73,9 @@ const handleSubmit = async () => {
     <form @submit.prevent="handleSubmit" class="space-y-6">
       <!-- Email Input -->
       <div class="space-y-2">
-        <label class="font-inter text-xs font-bold text-secondary uppercase tracking-widest block" for="email"
+        <label
+          class="font-inter text-xs font-bold text-secondary uppercase tracking-widest block"
+          for="email"
           >Email</label
         >
         <div class="relative group">
@@ -96,10 +99,14 @@ const handleSubmit = async () => {
       <!-- Password Input -->
       <div class="space-y-2">
         <div class="flex justify-between items-center">
-          <label class="font-inter text-xs font-bold text-secondary uppercase tracking-widest block" for="password"
+          <label
+            class="font-inter text-xs font-bold text-secondary uppercase tracking-widest block"
+            for="password"
             >Password</label
           >
-          <a class="font-inter text-xs font-semibold text-primary hover:text-primary/80 transition-colors" href="#"
+          <a
+            class="font-inter text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+            href="#"
             >Forgot?</a
           >
         </div>
@@ -129,7 +136,9 @@ const handleSubmit = async () => {
           type="checkbox"
           :disabled="isLoading"
         />
-        <label class="ml-3 font-inter text-sm text-secondary font-medium cursor-pointer select-none" for="remember-me"
+        <label
+          class="ml-3 font-inter text-sm text-secondary font-medium cursor-pointer select-none"
+          for="remember-me"
           >Remember me</label
         >
       </div>
@@ -154,7 +163,9 @@ const handleSubmit = async () => {
     <div class="mt-10 text-center border-t border-slate-100 pt-8">
       <p class="font-inter text-sm text-secondary font-medium">
         Don't have an account?
-        <RouterLink to="/auth/register" class="text-primary font-bold hover:underline underline-offset-4"
+        <RouterLink
+          to="/auth/register"
+          class="text-primary font-bold hover:underline underline-offset-4"
           >Register</RouterLink
         >
       </p>

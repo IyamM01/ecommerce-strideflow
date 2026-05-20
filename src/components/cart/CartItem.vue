@@ -8,19 +8,19 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  decrease: [productId: number]
-  increase: [productId: number]
-  remove: [productId: number]
+  decrease: [productId: number, color?: string, size?: string]
+  increase: [productId: number, color?: string, size?: string]
+  remove: [productId: number, color?: string, size?: string]
 }>()
 </script>
 
 <template>
-  <div class="flex gap-5 rounded-2xl border border-gray-200 bg-white p-5">
+  <div class="flex gap-5 rounded-lg border border-gray-200 bg-white p-5">
     <RouterLink :to="`/products/${item.product.id}`">
       <img
         :src="item.product.image_url || 'https://placehold.co/400x500?text=No+Image'"
         :alt="item.product.name"
-        class="h-28 w-28 rounded-xl bg-gray-100 object-cover sm:h-32 sm:w-32"
+        class="h-28 w-28 rounded-lg bg-gray-100 object-cover sm:h-32 sm:w-32"
       />
     </RouterLink>
 
@@ -32,10 +32,7 @@ const emit = defineEmits<{
           </h2>
         </RouterLink>
 
-        <p
-          v-if="item.product.brand?.name"
-          class="mt-1 text-sm text-gray-400"
-        >
+        <p v-if="item.product.brand?.name" class="mt-1 text-sm text-gray-400">
           {{ item.product.brand.name }}
         </p>
 
@@ -57,7 +54,7 @@ const emit = defineEmits<{
         <div class="flex items-center gap-3">
           <button
             class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-lg font-bold transition hover:bg-gray-100"
-            @click="emit('decrease', item.product.id)"
+            @click="emit('decrease', item.product.id, item.color, item.size)"
           >
             -
           </button>
@@ -68,7 +65,7 @@ const emit = defineEmits<{
 
           <button
             class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-lg font-bold transition hover:bg-gray-100"
-            @click="emit('increase', item.product.id)"
+            @click="emit('increase', item.product.id, item.color, item.size)"
           >
             +
           </button>
@@ -76,7 +73,7 @@ const emit = defineEmits<{
 
         <button
           class="text-sm font-bold text-red-500 transition hover:text-red-700"
-          @click="emit('remove', item.product.id)"
+          @click="emit('remove', item.product.id, item.color, item.size)"
         >
           Remove
         </button>

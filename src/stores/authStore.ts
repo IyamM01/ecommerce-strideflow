@@ -4,12 +4,20 @@ import { authService } from '@/services/authService'
 import type { User } from '@/types/user'
 import type { LoginPayload, RegisterPayload } from '@/types/auth'
 
+const parseStoredUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem('user') || 'null') as User | null
+  } catch {
+    localStorage.removeItem('user')
+    return null
+  }
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const isLoggedIn = ref(localStorage.getItem('isLoggedIn') === 'true')
-  const user = ref<User | null>(JSON.parse(localStorage.getItem('user') || 'null'))
+  const user = ref<User | null>(parseStoredUser())
   const token = ref<string | null>(localStorage.getItem('token'))
 
-  // Helper to set session
   function setAuth(userData: User, userToken: string) {
     isLoggedIn.value = true
     user.value = userData
@@ -18,6 +26,16 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('isLoggedIn', 'true')
     localStorage.setItem('user', JSON.stringify(userData))
     localStorage.setItem('token', userToken)
+  }
+
+  function clearAuth() {
+    isLoggedIn.value = false
+    user.value = null
+    token.value = null
+
+    localStorage.removeItem('isLoggedIn')
+    localStorage.removeItem('user')
+    localStorage.removeItem('token')
   }
 
   function syncUser(userData: User) {
@@ -41,11 +59,9 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await authService.logout()
     } finally {
-      isLoggedIn.value = false
-      user.value = null
-      token.value = null
+      clearAuth()
     }
   }
 
-  return { isLoggedIn, user, token, login, register, logout, syncUser }
+  return { isLoggedIn, user, token, clearAuth, login, register, logout, syncUser }
 })

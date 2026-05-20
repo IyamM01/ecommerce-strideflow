@@ -33,7 +33,9 @@ const { brandOptions, categoryOptions, genderOptions, optionLoadError } = usePro
 </script>
 
 <template>
-  <div class="bg-surface-container-lowest rounded-3xl border border-surface-container-high shadow-sm overflow-hidden">
+  <div
+    class="bg-surface-container-lowest rounded-3xl border border-surface-container-high shadow-sm overflow-hidden"
+  >
     <div class="border-b border-surface-container-high px-8 py-6">
       <h1 class="text-3xl font-bold text-on-background">{{ title }}</h1>
       <p class="mt-2 text-sm text-on-surface-variant">
@@ -66,7 +68,9 @@ const { brandOptions, categoryOptions, genderOptions, optionLoadError } = usePro
           </div>
 
           <div class="grid gap-2">
-            <label class="text-sm font-semibold text-on-background" for="description">Deskripsi</label>
+            <label class="text-sm font-semibold text-on-background" for="description"
+              >Deskripsi</label
+            >
             <textarea
               id="description"
               v-model="form.description"
@@ -113,7 +117,9 @@ const { brandOptions, categoryOptions, genderOptions, optionLoadError } = usePro
 
           <div class="grid gap-6 md:grid-cols-3">
             <div class="grid gap-2">
-              <label class="text-sm font-semibold text-on-background" for="category">Category</label>
+              <label class="text-sm font-semibold text-on-background" for="category"
+                >Category</label
+              >
               <select
                 id="category"
                 v-model.number="form.category_id"
@@ -226,7 +232,9 @@ const { brandOptions, categoryOptions, genderOptions, optionLoadError } = usePro
           </div>
         </div>
 
-        <div class="grid content-start gap-4 rounded-3xl border border-surface-container-high bg-surface-container-low p-5">
+        <div
+          class="grid content-start gap-4 rounded-3xl border border-surface-container-high bg-surface-container-low p-5"
+        >
           <div class="flex items-center justify-between gap-3">
             <div>
               <h2 class="text-base font-bold text-on-background">Media Produk</h2>
@@ -236,7 +244,9 @@ const { brandOptions, categoryOptions, genderOptions, optionLoadError } = usePro
             </div>
           </div>
 
-          <div class="overflow-hidden rounded-2xl border border-dashed border-surface-container-highest bg-surface-container-lowest">
+          <div
+            class="overflow-hidden rounded-2xl border border-dashed border-surface-container-highest bg-surface-container-lowest"
+          >
             <div class="aspect-[4/5] w-full">
               <img
                 v-if="imagePreview"
@@ -263,7 +273,11 @@ const { brandOptions, categoryOptions, genderOptions, optionLoadError } = usePro
               @change="handleImageChange"
             />
             <p class="text-xs text-on-surface-variant">
-              {{ requireImage ? 'Upload gambar wajib untuk produk baru.' : 'Kosongkan jika tidak ingin mengganti gambar.' }}
+              {{
+                requireImage
+                  ? 'Upload gambar wajib untuk produk baru.'
+                  : 'Kosongkan jika tidak ingin mengganti gambar.'
+              }}
             </p>
             <p v-if="getFieldError('image')" class="text-xs font-medium text-error">
               {{ getFieldError('image') }}
@@ -272,7 +286,9 @@ const { brandOptions, categoryOptions, genderOptions, optionLoadError } = usePro
         </div>
       </div>
 
-      <div class="flex flex-col-reverse gap-3 border-t border-surface-container-high pt-6 sm:flex-row sm:justify-end">
+      <div
+        class="flex flex-col-reverse gap-3 border-t border-surface-container-high pt-6 sm:flex-row sm:justify-end"
+      >
         <button
           type="button"
           class="rounded-2xl border border-surface-container-high px-5 py-3 text-sm font-semibold text-on-background transition hover:bg-surface-container-low"

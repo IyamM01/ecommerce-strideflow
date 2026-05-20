@@ -33,9 +33,7 @@ const emit = defineEmits<{
 
       <div class="flex justify-between text-sm">
         <span class="text-gray-500">Shipping</span>
-        <span class="font-bold text-black">
-          Free
-        </span>
+        <span class="font-bold text-black"> Free </span>
       </div>
 
       <div class="border-t border-gray-200 pt-4">

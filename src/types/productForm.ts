@@ -25,4 +25,4 @@ export interface ProductFormProps {
   requireImage?: boolean
 }
 
-export interface SelectOption extends ProductRelation {}
+export type SelectOption = ProductRelation

@@ -1,6 +1,12 @@
 import { defineStore } from 'pinia'
 import { productService } from '@/services/productService'
 import type { Product, ProductPayload } from '@/types/product'
+import {
+  getApiErrorMessage,
+  getValidationErrors,
+  unwrapCollection,
+  unwrapResource,
+} from '@/utils/apiResponse'
 
 export const useProductStore = defineStore('product', {
   state: () => ({
@@ -14,21 +20,36 @@ export const useProductStore = defineStore('product', {
     selectedSize: 'all' as string,
     selectedColor: 'all' as string,
     selectedGender: 'all' as string,
+    searchQuery: '',
   }),
 
   getters: {
     filteredProducts: (state) => {
-      return state.products.filter(product => {
+      return state.products.filter((product) => {
+        const keyword = state.searchQuery.trim().toLowerCase()
+        const searchableText = [
+          product.name,
+          product.description,
+          product.brand?.name,
+          product.category?.name,
+          product.gender?.name,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+        const matchSearch = !keyword || searchableText.includes(keyword)
+
         const pCategoryId = product.category_id ?? product.category?.id
-        const matchCategory = state.selectedCategory === 'all' || pCategoryId === state.selectedCategory
+        const matchCategory =
+          state.selectedCategory === 'all' || pCategoryId === state.selectedCategory
 
         const pBrandId = product.brand_id ?? product.brand?.id
         const matchBrand = state.selectedBrand === 'all' || pBrandId === state.selectedBrand
 
         // Gender filter: match by gender relation name (case-insensitive)
         const pGenderName = product.gender?.name?.toLowerCase() ?? ''
-        const matchGender = state.selectedGender === 'all' ||
-          pGenderName === state.selectedGender.toLowerCase()
+        const matchGender =
+          state.selectedGender === 'all' || pGenderName === state.selectedGender.toLowerCase()
 
         let matchSizeAndColor = true
         if (state.selectedSize !== 'all' || state.selectedColor !== 'all') {
@@ -37,22 +58,34 @@ export const useProductStore = defineStore('product', {
           matchSizeAndColor = sizeMatch && colorMatch
         }
 
-        return matchCategory && matchBrand && matchGender && matchSizeAndColor
+        return matchSearch && matchCategory && matchBrand && matchGender && matchSizeAndColor
       })
-    }
+    },
   },
 
   actions: {
+    setSearchQuery(query: string) {
+      this.searchQuery = query
+    },
+
+    resetFilters() {
+      this.selectedCategory = 'all'
+      this.selectedBrand = 'all'
+      this.selectedSize = 'all'
+      this.selectedColor = 'all'
+      this.selectedGender = 'all'
+      this.searchQuery = ''
+    },
+
     async fetchProducts() {
       this.loading = true
       this.error = null
 
       try {
         const data = await productService.getAll()
-        // Handle Laravel Resource structure if it exists, otherwise use raw data
-        this.products = (data as any).data ?? data
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Gagal mengambil data product'
+        this.products = unwrapCollection<Product>(data)
+      } catch (error) {
+        this.error = getApiErrorMessage(error, 'Gagal mengambil data product')
       } finally {
         this.loading = false
       }
@@ -64,9 +97,9 @@ export const useProductStore = defineStore('product', {
 
       try {
         const data = await productService.getById(id)
-        this.product = (data as any).data ?? data
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Gagal mengambil detail product'
+        this.product = unwrapResource<Product | null>(data, null)
+      } catch (error) {
+        this.error = getApiErrorMessage(error, 'Gagal mengambil detail product')
       } finally {
         this.loading = false
       }
@@ -80,12 +113,9 @@ export const useProductStore = defineStore('product', {
       try {
         await productService.create(payload)
         await this.fetchProducts()
-      } catch (error: any) {
-        if (error.response?.status === 422) {
-          this.validationErrors = error.response.data.errors
-        }
-
-        this.error = error.response?.data?.message || 'Gagal menambahkan product'
+      } catch (error) {
+        this.validationErrors = getValidationErrors(error)
+        this.error = getApiErrorMessage(error, 'Gagal menambahkan product')
         throw error
       } finally {
         this.loading = false
@@ -100,12 +130,9 @@ export const useProductStore = defineStore('product', {
       try {
         await productService.update(id, payload)
         await this.fetchProducts()
-      } catch (error: any) {
-        if (error.response?.status === 422) {
-          this.validationErrors = error.response.data.errors
-        }
-
-        this.error = error.response?.data?.message || 'Gagal mengupdate product'
+      } catch (error) {
+        this.validationErrors = getValidationErrors(error)
+        this.error = getApiErrorMessage(error, 'Gagal mengupdate product')
         throw error
       } finally {
         this.loading = false
@@ -119,8 +146,8 @@ export const useProductStore = defineStore('product', {
       try {
         await productService.delete(id)
         this.products = this.products.filter((product) => product.id !== id)
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Gagal menghapus product'
+      } catch (error) {
+        this.error = getApiErrorMessage(error, 'Gagal menghapus product')
         throw error
       } finally {
         this.loading = false

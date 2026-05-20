@@ -42,16 +42,38 @@ const formatDate = (value?: string) => {
       </div>
     </div>
 
-    <div class="overflow-hidden rounded-3xl border border-surface-container-high bg-surface-container-lowest shadow-sm">
+    <div
+      class="overflow-hidden rounded-3xl border border-surface-container-high bg-surface-container-lowest shadow-sm"
+    >
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="border-b border-outline-variant bg-surface-container-low">
-              <th class="p-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Order ID</th>
-              <th class="p-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Date</th>
-              <th class="p-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Items</th>
-              <th class="p-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Total</th>
-              <th class="p-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Status</th>
+              <th
+                class="p-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant"
+              >
+                Order ID
+              </th>
+              <th
+                class="p-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant"
+              >
+                Date
+              </th>
+              <th
+                class="p-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant"
+              >
+                Items
+              </th>
+              <th
+                class="p-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant"
+              >
+                Total
+              </th>
+              <th
+                class="p-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant"
+              >
+                Status
+              </th>
             </tr>
           </thead>
 
@@ -62,7 +84,9 @@ const formatDate = (value?: string) => {
               class="border-b border-outline-variant last:border-b-0 hover:bg-surface transition-colors"
             >
               <td class="p-4 font-semibold text-on-background">#{{ order.order_code }}</td>
-              <td class="p-4 text-sm text-on-surface-variant">{{ formatDate(order.created_at) }}</td>
+              <td class="p-4 text-sm text-on-surface-variant">
+                {{ formatDate(order.created_at) }}
+              </td>
               <td class="p-4">
                 <div class="flex items-center gap-2">
                   <img
@@ -79,7 +103,9 @@ const formatDate = (value?: string) => {
                   </span>
                 </div>
               </td>
-              <td class="p-4 font-semibold text-on-background">{{ formatCurrency(order.total_price) }}</td>
+              <td class="p-4 font-semibold text-on-background">
+                {{ formatCurrency(order.total_price) }}
+              </td>
               <td class="p-4">
                 <span
                   class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold capitalize"

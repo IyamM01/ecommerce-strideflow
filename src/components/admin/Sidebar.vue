@@ -3,6 +3,10 @@ import { computed } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useRoute, useRouter } from 'vue-router'
 
+defineOptions({
+  name: 'AdminSidebar',
+})
+
 const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
@@ -30,11 +34,7 @@ const handleLogout = async () => {
     </div>
 
     <nav class="flex-1 flex flex-col gap-2">
-      <RouterLink
-        to="/admin"
-        class="menu-link"
-        :class="{ 'menu-link-active': isDashboardRoute }"
-      >
+      <RouterLink to="/admin" class="menu-link" :class="{ 'menu-link-active': isDashboardRoute }">
         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">
           dashboard
         </span>
@@ -59,11 +59,7 @@ const handleLogout = async () => {
         <span class="text-sm">Products</span>
       </RouterLink>
 
-      <RouterLink
-        to="/admin/users"
-        class="menu-link"
-        :class="{ 'menu-link-active': isUserRoute }"
-      >
+      <RouterLink to="/admin/users" class="menu-link" :class="{ 'menu-link-active': isUserRoute }">
         <span class="material-symbols-outlined">person_outline</span>
         <span class="text-sm">Users</span>
       </RouterLink>

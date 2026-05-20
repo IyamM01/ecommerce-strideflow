@@ -13,11 +13,16 @@ defineProps<{
 </script>
 
 <template>
-  <div class="bg-surface-container-lowest rounded-lg shadow-sm border border-surface-container-high overflow-hidden">
+  <div
+    class="bg-surface-container-lowest rounded-lg shadow-sm border border-surface-container-high overflow-hidden"
+  >
     <div class="p-6 border-b border-surface-container-high flex justify-between items-center">
       <h2 class="text-xl font-bold text-on-background">Recent Orders</h2>
 
-      <RouterLink to="/admin/orders" class="text-primary-container text-sm font-semibold hover:underline">
+      <RouterLink
+        to="/admin/orders"
+        class="text-primary-container text-sm font-semibold hover:underline"
+      >
         View All Orders
       </RouterLink>
     </div>
@@ -25,7 +30,9 @@ defineProps<{
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead>
-          <tr class="bg-surface-container-low border-b border-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase tracking-wider">
+          <tr
+            class="bg-surface-container-low border-b border-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase tracking-wider"
+          >
             <th class="p-4 pl-6">Order ID</th>
             <th class="p-4">Customer</th>
             <th class="p-4">Date</th>

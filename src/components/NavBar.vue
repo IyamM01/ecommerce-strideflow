@@ -1,179 +1,225 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter, RouterLink } from 'vue-router'
-import { ShoppingCart, CircleUser, Search, Heart, Menu, X, LogOut } from '@lucide/vue'
+import { computed, ref, watch } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { CircleUser, Heart, LogOut, Menu, Search, ShieldCheck, ShoppingCart, X } from '@lucide/vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useCartStore } from '@/stores/cartStore'
+import { useProductStore } from '@/stores/productStore'
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
+const productStore = useProductStore()
 const router = useRouter()
+const route = useRoute()
+
 const isOpen = ref(false)
+const searchQuery = ref('')
+
+const navItems = [
+  { label: 'Men', to: '/men' },
+  { label: 'Woman', to: '/woman' },
+  { label: 'Kids', to: '/kids' },
+]
+
+const accountLabel = computed(() => authStore.user?.name?.split(' ')[0] ?? 'Profile')
+
+watch(
+  () => route.query.q,
+  (value) => {
+    if (route.name === 'home') {
+      searchQuery.value = typeof value === 'string' ? value : ''
+    }
+  },
+  { immediate: true },
+)
+
+const submitSearch = () => {
+  const query = searchQuery.value.trim()
+  productStore.setSearchQuery(query)
+  isOpen.value = false
+
+  router.push({
+    name: 'home',
+    query: query ? { q: query } : undefined,
+  })
+}
 
 const handleLogout = async () => {
   await authStore.logout()
+  isOpen.value = false
   router.push('/auth/login')
 }
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white">
+  <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/95 backdrop-blur">
     <nav class="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
-      <!-- Logo -->
-      <div class="flex w-1/4 items-center">
-        <RouterLink to="/" class="inline-flex items-center">
-          <img src="/src/assets/logo.webp" alt="Logo" class="h-15 w-auto object-contain" />
-        </RouterLink>
-      </div>
+      <RouterLink to="/" class="inline-flex items-center" aria-label="StrideFlow home">
+        <img src="/src/assets/logo.webp" alt="StrideFlow" class="h-14 w-auto object-contain" />
+      </RouterLink>
 
-      <!-- Center: Menu -->
-      <div class="hidden flex-1 justify-center md:flex">
-        <ul class="flex items-center gap-10">
-          <li>
-            <RouterLink
-              to="/men"
-              class="relative text-[15px] font-semibold font-poppins text-secondary transition hover:text-primary after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
-              active-class="text-primary after:w-full"
-            >
-              Men
-            </RouterLink>
-          </li>
+      <ul class="hidden items-center gap-10 md:flex">
+        <li v-for="item in navItems" :key="item.to">
+          <RouterLink
+            :to="item.to"
+            class="relative text-[15px] font-semibold text-secondary transition hover:text-primary after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
+            active-class="text-primary after:w-full"
+          >
+            {{ item.label }}
+          </RouterLink>
+        </li>
+      </ul>
 
-          <li>
-            <RouterLink
-              to="/woman"
-              class="relative text-[15px] font-semibold font-poppins text-secondary transition hover:text-primary after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
-              active-class="text-primary after:w-full"
-            >
-              Woman
-            </RouterLink>
-          </li>
-
-          <li>
-            <RouterLink
-              to="/kids"
-              class="relative text-[15px] font-semibold font-poppins text-secondary transition hover:text-primary after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
-              active-class="text-primary after:w-full"
-            >
-              Kids
-            </RouterLink>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Right: Search & Icons -->
-      <div class="flex w-1/4 items-center justify-end gap-6">
-        <!-- Search -->
-        <div class="hidden lg:block">
-          <div class="flex h-10 w-64 items-center rounded-full bg-background px-4">
+      <div class="flex items-center justify-end gap-3 sm:gap-5">
+        <form class="hidden lg:block" role="search" @submit.prevent="submitSearch">
+          <label class="flex h-10 w-64 items-center rounded-lg bg-slate-100 px-4">
+            <span class="sr-only">Search products</span>
             <input
-              type="text"
-              placeholder="Search..."
+              v-model="searchQuery"
+              type="search"
+              placeholder="Search products"
               class="w-full bg-transparent text-sm text-secondary placeholder:text-quaternary focus:outline-none"
             />
             <Search class="ml-2 h-4 w-4 text-quaternary" />
-          </div>
-        </div>
+          </label>
+        </form>
 
-        <!-- Wishlist -->
-        <a
-          href="#"
-          class="relative flex items-center text-primary transition hover:opacity-80 after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
+        <button
+          class="hidden h-10 w-10 items-center justify-center rounded-lg text-primary transition hover:bg-slate-100 md:flex"
+          type="button"
+          aria-label="Wishlist"
         >
           <Heart class="h-5 w-5" stroke-width="2" />
-        </a>
+        </button>
 
-        <!-- Cart -->
         <RouterLink
           to="/cart"
-          class="relative flex items-center text-primary transition hover:opacity-80 after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
+          class="relative flex h-10 w-10 items-center justify-center rounded-lg text-primary transition hover:bg-slate-100"
+          aria-label="Shopping cart"
         >
           <ShoppingCart class="h-5 w-5" stroke-width="2" />
 
           <span
             v-if="cartStore.totalItems > 0"
-            class="absolute -right-3 -top-3 flex h-5 min-w-5 items-center justify-center rounded-full bg-black px-1.5 text-[10px] font-bold leading-none text-white"
+            class="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-black px-1.5 text-[10px] font-bold leading-none text-white"
           >
             {{ cartStore.totalItems }}
           </span>
         </RouterLink>
 
-        <!-- Account -->
         <RouterLink
           v-if="!authStore.isLoggedIn"
           to="/auth/login"
-          class="relative flex items-center text-[15px] font-semibold font-poppins text-secondary transition hover:text-primary after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
+          class="hidden rounded-lg px-3 py-2 text-[15px] font-semibold text-secondary transition hover:bg-slate-100 hover:text-primary md:inline-flex"
         >
           Login
         </RouterLink>
 
-        <div v-else class="flex items-center gap-4">
+        <div v-else class="hidden items-center gap-2 md:flex">
+          <RouterLink
+            v-if="authStore.user?.role === 'admin'"
+            to="/admin"
+            class="flex h-10 w-10 items-center justify-center rounded-lg text-primary transition hover:bg-slate-100"
+            aria-label="Admin dashboard"
+          >
+            <ShieldCheck class="h-5 w-5" stroke-width="2" />
+          </RouterLink>
+
           <RouterLink
             to="/profile"
-            class="relative flex items-center text-primary transition hover:opacity-80"
+            class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-secondary transition hover:bg-slate-100 hover:text-primary"
           >
             <CircleUser class="h-5 w-5" stroke-width="2" />
+            <span class="max-w-24 truncate">{{ accountLabel }}</span>
           </RouterLink>
 
           <button
-            @click="handleLogout"
-            class="text-secondary hover:text-red-500 transition-colors"
+            class="flex h-10 w-10 items-center justify-center rounded-lg text-secondary transition hover:bg-red-50 hover:text-red-600"
+            type="button"
             title="Logout"
+            @click="handleLogout"
           >
             <LogOut class="h-5 w-5" stroke-width="2" />
           </button>
         </div>
 
-        <!-- Mobile Menu Button -->
-        <button class="md:hidden text-primary" type="button" @click="isOpen = !isOpen">
+        <button
+          class="flex h-10 w-10 items-center justify-center rounded-lg text-primary transition hover:bg-slate-100 md:hidden"
+          type="button"
+          aria-label="Toggle menu"
+          :aria-expanded="isOpen"
+          @click="isOpen = !isOpen"
+        >
           <X v-if="isOpen" class="h-6 w-6" />
           <Menu v-else class="h-6 w-6" />
         </button>
       </div>
     </nav>
 
-    <!-- Mobile Menu -->
-    <div v-if="isOpen" class="border-t border-slate-200 bg-white px-6 py-4 md:hidden">
-      <ul class="space-y-4">
-        <li>
-          <RouterLink
-            to="/men"
-            class="block text-base font-semibold text-secondary hover:text-primary"
-            @click="isOpen = false"
-          >
-            Men
-          </RouterLink>
-        </li>
+    <div v-if="isOpen" class="border-t border-slate-200 bg-white px-6 py-5 md:hidden">
+      <form class="mb-5" role="search" @submit.prevent="submitSearch">
+        <label class="flex h-11 items-center rounded-lg bg-slate-100 px-4">
+          <span class="sr-only">Search products</span>
+          <input
+            v-model="searchQuery"
+            type="search"
+            placeholder="Search products"
+            class="w-full bg-transparent text-sm text-secondary placeholder:text-quaternary focus:outline-none"
+          />
+          <Search class="ml-2 h-4 w-4 text-quaternary" />
+        </label>
+      </form>
 
-        <li>
+      <ul class="space-y-2">
+        <li v-for="item in navItems" :key="item.to">
           <RouterLink
-            to="/woman"
-            class="block text-base font-semibold text-secondary hover:text-primary"
+            :to="item.to"
+            class="block rounded-lg px-3 py-3 text-base font-semibold text-secondary hover:bg-slate-100 hover:text-primary"
             @click="isOpen = false"
           >
-            Woman
-          </RouterLink>
-        </li>
-
-        <li>
-          <RouterLink
-            to="/kids"
-            class="block text-base font-semibold text-secondary hover:text-primary"
-            @click="isOpen = false"
-          >
-            Kids
+            {{ item.label }}
           </RouterLink>
         </li>
       </ul>
 
-      <div class="mt-5">
-        <div class="flex h-10 items-center rounded-full bg-background px-4">
-          <input
-            type="text"
-            placeholder="Search..."
-            class="w-full bg-transparent text-sm text-secondary placeholder:text-quaternary focus:outline-none"
-          />
-          <Search class="ml-2 h-4 w-4 text-quaternary" />
+      <div class="mt-5 border-t border-slate-100 pt-5">
+        <RouterLink
+          v-if="!authStore.isLoggedIn"
+          to="/auth/login"
+          class="block rounded-lg px-3 py-3 text-base font-semibold text-secondary hover:bg-slate-100 hover:text-primary"
+          @click="isOpen = false"
+        >
+          Login
+        </RouterLink>
+
+        <div v-else class="grid gap-2">
+          <RouterLink
+            to="/profile"
+            class="flex items-center gap-3 rounded-lg px-3 py-3 text-base font-semibold text-secondary hover:bg-slate-100 hover:text-primary"
+            @click="isOpen = false"
+          >
+            <CircleUser class="h-5 w-5" stroke-width="2" />
+            {{ accountLabel }}
+          </RouterLink>
+
+          <RouterLink
+            v-if="authStore.user?.role === 'admin'"
+            to="/admin"
+            class="flex items-center gap-3 rounded-lg px-3 py-3 text-base font-semibold text-secondary hover:bg-slate-100 hover:text-primary"
+            @click="isOpen = false"
+          >
+            <ShieldCheck class="h-5 w-5" stroke-width="2" />
+            Admin
+          </RouterLink>
+
+          <button
+            class="flex items-center gap-3 rounded-lg px-3 py-3 text-left text-base font-semibold text-red-600 hover:bg-red-50"
+            type="button"
+            @click="handleLogout"
+          >
+            <LogOut class="h-5 w-5" stroke-width="2" />
+            Logout
+          </button>
         </div>
       </div>
     </div>

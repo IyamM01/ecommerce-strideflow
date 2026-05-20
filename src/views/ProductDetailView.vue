@@ -16,27 +16,24 @@ import type { Review } from '@/services/reviewService'
 import { useAuthStore } from '@/stores/authStore'
 import { useCartStore } from '@/stores/cartStore'
 import type { Product } from '@/types/product'
+import { getApiErrorMessage, unwrapCollection, unwrapResource } from '@/utils/apiResponse'
 
-// ─── Router & Auth ────────────────────────────────────────
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 
-// ─── Product State ────────────────────────────────────────
 const product = ref<Product | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
 const relatedProducts = ref<Product[]>([])
 
-// ─── Gallery ──────────────────────────────────────────────
 const selectedImage = ref(0)
 const thumbnails = computed(() => {
   const url = product.value?.image_url || 'https://placehold.co/700x875?text=No+Image'
   return [url, url, url, url]
 })
 
-// ─── Info Panel ───────────────────────────────────────────
 const selectedColor = ref<string | null>(null)
 const selectedSize = ref<string | null>(null)
 const quantity = ref(1)
@@ -48,13 +45,15 @@ const openSections = ref<Record<string, boolean>>({
 })
 const uniqueSizes = computed(() => {
   if (!product.value?.size) return []
-  return product.value.size.split(',').map(s => s.trim()).filter(Boolean)
+  return product.value.size
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
 })
 const toggleSection = (key: string) => {
   openSections.value[key] = !openSections.value[key]
 }
 
-// ─── Reviews ──────────────────────────────────────────────
 const reviews = ref<Review[]>([])
 const avgRating = ref(0)
 const reviewCount = ref(0)
@@ -107,14 +106,13 @@ const submitReview = async () => {
     newRating.value = 0
     newComment.value = ''
     await fetchReviews(product.value.id)
-  } catch (err: any) {
-    submitError.value = err.response?.data?.message || 'Failed to submit review'
+  } catch (err) {
+    submitError.value = getApiErrorMessage(err, 'Failed to submit review')
   } finally {
     submitLoading.value = false
   }
 }
 
-// ─── Cart Actions ─────────────────────────────────────────
 const handleAddToCart = () => {
   if (!product.value) return
 
@@ -125,7 +123,7 @@ const handleAddToCart = () => {
     })
     return
   }
-  
+
   cartStore.addToCart(
     {
       id: product.value.id,
@@ -137,7 +135,7 @@ const handleAddToCart = () => {
     },
     quantity.value,
     selectedColor.value,
-    selectedSize.value
+    selectedSize.value,
   )
 
   router.push('/cart')
@@ -153,7 +151,7 @@ const handleBuyNow = () => {
     })
     return
   }
-  
+
   cartStore.addToCart(
     {
       id: product.value.id,
@@ -165,24 +163,23 @@ const handleBuyNow = () => {
     },
     quantity.value,
     selectedColor.value,
-    selectedSize.value
+    selectedSize.value,
   )
 
   router.push('/checkout')
 }
 
-// ─── Data Fetching ────────────────────────────────────────
 const fetchProduct = async (id: number) => {
   loading.value = true
   error.value = null
   try {
     const data = await productService.getById(id)
-    product.value = (data as any).data ?? data
+    product.value = unwrapResource<Product | null>(data, null)
     if (product.value?.color) selectedColor.value = product.value.color ?? null
     if (uniqueSizes.value.length > 0) selectedSize.value = uniqueSizes.value[0] ?? null
     await Promise.all([fetchRelated(), fetchReviews(id)])
-  } catch (err: any) {
-    error.value = err.response?.data?.message || 'Product not found'
+  } catch (err) {
+    error.value = getApiErrorMessage(err, 'Product not found')
   } finally {
     loading.value = false
   }
@@ -191,8 +188,8 @@ const fetchProduct = async (id: number) => {
 const fetchRelated = async () => {
   try {
     const data = await productService.getAll()
-    const all: Product[] = (data as any).data ?? data
-    relatedProducts.value = all.filter(p => p.id !== product.value?.id).slice(0, 4)
+    const all = unwrapCollection<Product>(data)
+    relatedProducts.value = all.filter((p) => p.id !== product.value?.id).slice(0, 4)
   } catch {
     relatedProducts.value = []
   }
@@ -203,30 +200,40 @@ onMounted(() => {
   if (!isNaN(id)) fetchProduct(id)
 })
 
-watch(() => route.params.id, (newId) => {
-  const id = Number(newId)
-  if (!isNaN(id)) {
-    selectedImage.value = 0
-    submitSuccess.value = false
-    fetchProduct(id)
-  }
-})
+watch(
+  () => route.params.id,
+  (newId) => {
+    const id = Number(newId)
+    if (!isNaN(id)) {
+      selectedImage.value = 0
+      submitSuccess.value = false
+      fetchProduct(id)
+    }
+  },
+)
 </script>
 
 <template>
   <NavBar />
 
   <main class="min-h-screen bg-white">
-
     <!-- Loading -->
     <div v-if="loading" class="flex items-center justify-center h-[60vh]">
-      <div class="h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-black"></div>
+      <div
+        class="h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-black"
+      ></div>
     </div>
 
     <!-- Error -->
-    <div v-else-if="error" class="flex flex-col items-center justify-center h-[60vh] gap-4 text-center px-4">
+    <div
+      v-else-if="error"
+      class="flex flex-col items-center justify-center h-[60vh] gap-4 text-center px-4"
+    >
       <p class="text-gray-500 text-lg">{{ error }}</p>
-      <button @click="router.back()" class="flex items-center gap-2 text-sm font-semibold underline underline-offset-4">
+      <button
+        @click="router.back()"
+        class="flex items-center gap-2 text-sm font-semibold underline underline-offset-4"
+      >
         <ArrowLeft :size="16" /> Go Back
       </button>
     </div>
@@ -234,7 +241,6 @@ watch(() => route.params.id, (newId) => {
     <!-- Content -->
     <template v-else-if="product">
       <div class="mx-auto max-w-[1440px] px-6 py-10 lg:px-12">
-
         <!-- Breadcrumbs -->
         <nav class="flex items-center gap-1.5 text-xs font-semibold text-gray-400 mb-10 flex-wrap">
           <RouterLink to="/" class="hover:text-black transition-colors">Home</RouterLink>
@@ -300,10 +306,8 @@ watch(() => route.params.id, (newId) => {
 
         <!-- Related -->
         <ProductRelated :products="relatedProducts" />
-
       </div>
     </template>
-
   </main>
 
   <Footer />

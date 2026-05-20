@@ -6,6 +6,7 @@ import type { Category } from '@/types/category'
 import type { ProductRelation } from '@/types/product'
 import { useProductStore } from '@/stores/productStore'
 import { unwrapCollection } from '@/utils/apiResponse'
+import { formatCurrency } from '@/utils/formatCurrency'
 
 const productStore = useProductStore()
 const categories = ref<Category[]>([])
@@ -40,7 +41,32 @@ const selectColor = (color: string) => {
   productStore.selectedColor = productStore.selectedColor === color ? 'all' : color
 }
 
-const priceRange = ref(100)
+const priceStep = 50000
+
+const maxProductPrice = computed(() => {
+  const highestPrice = Math.max(...productStore.products.map((product) => product.price), 0)
+  return highestPrice > 0 ? Math.ceil(highestPrice / priceStep) * priceStep : 0
+})
+
+const priceLimit = computed({
+  get() {
+    return productStore.selectedMaxPrice ?? maxProductPrice.value
+  },
+  set(value: number) {
+    const limit = Number(value)
+    productStore.setMaxPrice(limit >= maxProductPrice.value ? null : limit)
+  },
+})
+
+const priceLabel = computed(() => {
+  return productStore.selectedMaxPrice === null
+    ? 'Semua harga'
+    : `Hingga ${formatCurrency(productStore.selectedMaxPrice)}`
+})
+
+const resetPriceRange = () => {
+  productStore.setMaxPrice(null)
+}
 
 const availableSizes = computed(() => {
   const sizes = new Set<string>()
@@ -153,17 +179,30 @@ const availableColors = computed(() => {
 
     <!-- Price Range -->
     <div>
-      <h3 class="text-base font-semibold text-gray-900 mb-4">Price Range</h3>
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <h3 class="text-base font-semibold text-gray-900">Price Range</h3>
+        <button
+          v-if="productStore.selectedMaxPrice !== null"
+          type="button"
+          class="text-xs font-bold uppercase text-gray-400 transition hover:text-black"
+          @click="resetPriceRange"
+        >
+          Reset
+        </button>
+      </div>
+      <p class="mb-3 text-sm font-semibold text-black">{{ priceLabel }}</p>
       <input
+        v-model.number="priceLimit"
         type="range"
         min="0"
-        max="200"
-        v-model="priceRange"
+        :max="maxProductPrice"
+        :step="priceStep"
+        :disabled="maxProductPrice === 0"
         class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
       />
       <div class="flex justify-between mt-2 text-xs font-medium text-gray-500">
-        <span>$0</span>
-        <span>$200+</span>
+        <span>{{ formatCurrency(0) }}</span>
+        <span>{{ formatCurrency(maxProductPrice) }}</span>
       </div>
     </div>
 

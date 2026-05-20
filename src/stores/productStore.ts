@@ -20,6 +20,7 @@ export const useProductStore = defineStore('product', {
     selectedSize: 'all' as string,
     selectedColor: 'all' as string,
     selectedGender: 'all' as string,
+    selectedMaxPrice: null as number | null,
     searchQuery: '',
   }),
 
@@ -46,6 +47,9 @@ export const useProductStore = defineStore('product', {
         const pBrandId = product.brand_id ?? product.brand?.id
         const matchBrand = state.selectedBrand === 'all' || pBrandId === state.selectedBrand
 
+        const matchPrice =
+          state.selectedMaxPrice === null || product.price <= state.selectedMaxPrice
+
         // Gender filter: match by gender relation name (case-insensitive)
         const pGenderName = product.gender?.name?.toLowerCase() ?? ''
         const matchGender =
@@ -58,7 +62,14 @@ export const useProductStore = defineStore('product', {
           matchSizeAndColor = sizeMatch && colorMatch
         }
 
-        return matchSearch && matchCategory && matchBrand && matchGender && matchSizeAndColor
+        return (
+          matchSearch &&
+          matchCategory &&
+          matchBrand &&
+          matchPrice &&
+          matchGender &&
+          matchSizeAndColor
+        )
       })
     },
   },
@@ -68,12 +79,17 @@ export const useProductStore = defineStore('product', {
       this.searchQuery = query
     },
 
+    setMaxPrice(price: number | null) {
+      this.selectedMaxPrice = price
+    },
+
     resetFilters() {
       this.selectedCategory = 'all'
       this.selectedBrand = 'all'
       this.selectedSize = 'all'
       this.selectedColor = 'all'
       this.selectedGender = 'all'
+      this.selectedMaxPrice = null
       this.searchQuery = ''
     },
 

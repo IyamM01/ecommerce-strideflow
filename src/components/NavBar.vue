@@ -1,48 +1,24 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { CircleUser, Heart, LogOut, Menu, Search, ShieldCheck, ShoppingCart, X } from '@lucide/vue'
+import { computed, ref } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
+import { CircleUser, Heart, LogOut, Menu, ShieldCheck, ShoppingCart, X } from '@lucide/vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useCartStore } from '@/stores/cartStore'
-import { useProductStore } from '@/stores/productStore'
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
-const productStore = useProductStore()
 const router = useRouter()
-const route = useRoute()
 
 const isOpen = ref(false)
-const searchQuery = ref('')
 
 const navItems = [
+  { label: 'Shop', to: '/shop' },
   { label: 'Men', to: '/men' },
   { label: 'Woman', to: '/woman' },
   { label: 'Kids', to: '/kids' },
 ]
 
 const accountLabel = computed(() => authStore.user?.name?.split(' ')[0] ?? 'Profile')
-
-watch(
-  () => route.query.q,
-  (value) => {
-    if (route.name === 'home') {
-      searchQuery.value = typeof value === 'string' ? value : ''
-    }
-  },
-  { immediate: true },
-)
-
-const submitSearch = () => {
-  const query = searchQuery.value.trim()
-  productStore.setSearchQuery(query)
-  isOpen.value = false
-
-  router.push({
-    name: 'home',
-    query: query ? { q: query } : undefined,
-  })
-}
 
 const handleLogout = async () => {
   await authStore.logout()
@@ -71,19 +47,6 @@ const handleLogout = async () => {
       </ul>
 
       <div class="flex items-center justify-end gap-3 sm:gap-5">
-        <form class="hidden lg:block" role="search" @submit.prevent="submitSearch">
-          <label class="flex h-10 w-64 items-center rounded-lg bg-slate-100 px-4">
-            <span class="sr-only">Search products</span>
-            <input
-              v-model="searchQuery"
-              type="search"
-              placeholder="Search products"
-              class="w-full bg-transparent text-sm text-secondary placeholder:text-quaternary focus:outline-none"
-            />
-            <Search class="ml-2 h-4 w-4 text-quaternary" />
-          </label>
-        </form>
-
         <button
           class="hidden h-10 w-10 items-center justify-center rounded-lg text-primary transition hover:bg-slate-100 md:flex"
           type="button"
@@ -157,19 +120,6 @@ const handleLogout = async () => {
     </nav>
 
     <div v-if="isOpen" class="border-t border-slate-200 bg-white px-6 py-5 md:hidden">
-      <form class="mb-5" role="search" @submit.prevent="submitSearch">
-        <label class="flex h-11 items-center rounded-lg bg-slate-100 px-4">
-          <span class="sr-only">Search products</span>
-          <input
-            v-model="searchQuery"
-            type="search"
-            placeholder="Search products"
-            class="w-full bg-transparent text-sm text-secondary placeholder:text-quaternary focus:outline-none"
-          />
-          <Search class="ml-2 h-4 w-4 text-quaternary" />
-        </label>
-      </form>
-
       <ul class="space-y-2">
         <li v-for="item in navItems" :key="item.to">
           <RouterLink

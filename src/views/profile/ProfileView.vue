@@ -52,13 +52,6 @@ const updateProfileFormField = (field: keyof ProfileFormValues, value: string) =
             Kelola informasi akun pribadi dan lihat ringkasan pesanan terbaru Anda.
           </p>
         </div>
-
-        <div
-          class="inline-flex items-center gap-2 rounded-xl bg-secondary-container px-5 py-3 text-sm font-semibold text-white"
-        >
-          <span class="material-symbols-outlined text-[18px]">verified_user</span>
-          {{ profile?.role === 'admin' ? 'Admin Account' : 'Customer Account' }}
-        </div>
       </header>
 
       <div

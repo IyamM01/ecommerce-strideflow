@@ -22,6 +22,11 @@ export interface Product {
   gender_id: number
   gender?: ProductRelation
   badge?: string
+  sold_count?: number
+  total_sold?: number
+  sales_count?: number
+  order_count?: number
+  purchased_count?: number
   created_at?: string
   updated_at?: string
 }

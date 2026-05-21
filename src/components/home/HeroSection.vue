@@ -34,7 +34,7 @@ import { ArrowRight } from '@lucide/vue'
 
         <!-- CTA Button -->
         <router-link
-          to="/men"
+          to="/shop"
           class="group inline-flex items-center rounded-lg bg-black px-8 py-3 text-lg font-semibold text-white shadow-lg transition hover:bg-secondary"
         >
           Explore Collection

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ChevronRight, ArrowLeft } from '@lucide/vue'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { ArrowLeft, Check, ChevronRight, ShoppingCart } from '@lucide/vue'
 
 import NavBar from '@/components/NavBar.vue'
 import Footer from '@/components/Footer.vue'
@@ -10,211 +10,79 @@ import ProductInfo from '@/components/product-detail/ProductInfo.vue'
 import ProductReviews from '@/components/product-detail/ProductReviews.vue'
 import ProductRelated from '@/components/product-detail/ProductRelated.vue'
 
-import { productService } from '@/services/productService'
-import { reviewService } from '@/services/reviewService'
-import type { Review } from '@/services/reviewService'
-import { useAuthStore } from '@/stores/authStore'
-import { useCartStore } from '@/stores/cartStore'
-import type { Product } from '@/types/product'
-import { getApiErrorMessage, unwrapCollection, unwrapResource } from '@/utils/apiResponse'
+import { useProductDetailPage } from '@/composables/useProductDetailPage'
 
 const route = useRoute()
-const router = useRouter()
-const authStore = useAuthStore()
-const cartStore = useCartStore()
+const productIdParam = computed(() => route.params.id)
 
-const product = ref<Product | null>(null)
-const loading = ref(true)
-const error = ref<string | null>(null)
-const relatedProducts = ref<Product[]>([])
-
-const selectedImage = ref(0)
-const thumbnails = computed(() => {
-  const url = product.value?.image_url || 'https://placehold.co/700x875?text=No+Image'
-  return [url, url, url, url]
-})
-
-const selectedColor = ref<string | null>(null)
-const selectedSize = ref<string | null>(null)
-const quantity = ref(1)
-const wishlist = ref(false)
-const openSections = ref<Record<string, boolean>>({
-  description: true,
-  details: false,
-  shipping: false,
-})
-const uniqueSizes = computed(() => {
-  if (!product.value?.size) return []
-  return product.value.size
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean)
-})
-const toggleSection = (key: string) => {
-  openSections.value[key] = !openSections.value[key]
-}
-
-const reviews = ref<Review[]>([])
-const avgRating = ref(0)
-const reviewCount = ref(0)
-const reviewsLoading = ref(false)
-const submitLoading = ref(false)
-const submitError = ref<string | null>(null)
-const submitSuccess = ref(false)
-const newRating = ref(0)
-const newComment = ref('')
-const hoverRating = ref(0)
-
-const ratingStars = computed(() => {
-  const stars: string[] = []
-  const floor = Math.floor(avgRating.value)
-  const frac = avgRating.value - floor
-  const hasHalf = frac >= 0.25 && frac < 0.75
-  const full = hasHalf ? floor : frac >= 0.75 ? floor + 1 : floor
-  for (let i = 1; i <= 5; i++) {
-    if (i <= full) stars.push('full')
-    else if (i === full + 1 && hasHalf) stars.push('half')
-    else stars.push('empty')
-  }
-  return stars
-})
-
-const fetchReviews = async (productId: number) => {
-  reviewsLoading.value = true
-  try {
-    const res = await reviewService.getByProduct(productId)
-    reviews.value = res.data
-    avgRating.value = res.avg_rating
-    reviewCount.value = res.review_count
-  } catch {
-    // silently fail
-  } finally {
-    reviewsLoading.value = false
-  }
-}
-
-const submitReview = async () => {
-  if (!product.value || newRating.value === 0) return
-  submitLoading.value = true
-  submitError.value = null
-  try {
-    await reviewService.submit(product.value.id, {
-      rating: newRating.value,
-      comment: newComment.value,
-    })
-    submitSuccess.value = true
-    newRating.value = 0
-    newComment.value = ''
-    await fetchReviews(product.value.id)
-  } catch (err) {
-    submitError.value = getApiErrorMessage(err, 'Failed to submit review')
-  } finally {
-    submitLoading.value = false
-  }
-}
-
-const handleAddToCart = () => {
-  if (!product.value) return
-
-  if (!authStore.isLoggedIn) {
-    router.push({
-      path: '/auth/login',
-      query: { redirect: '/cart' },
-    })
-    return
-  }
-
-  cartStore.addToCart(
-    {
-      id: product.value.id,
-      name: product.value.name,
-      price: product.value.price,
-      image_url: product.value.image_url,
-      stock: product.value.stock,
-      brand: product.value.brand,
-    },
-    quantity.value,
-    selectedColor.value,
-    selectedSize.value,
-  )
-
-  router.push('/cart')
-}
-
-const handleBuyNow = () => {
-  if (!product.value) return
-
-  if (!authStore.isLoggedIn) {
-    router.push({
-      path: '/auth/login',
-      query: { redirect: '/checkout' },
-    })
-    return
-  }
-
-  cartStore.addToCart(
-    {
-      id: product.value.id,
-      name: product.value.name,
-      price: product.value.price,
-      image_url: product.value.image_url,
-      stock: product.value.stock,
-      brand: product.value.brand,
-    },
-    quantity.value,
-    selectedColor.value,
-    selectedSize.value,
-  )
-
-  router.push('/checkout')
-}
-
-const fetchProduct = async (id: number) => {
-  loading.value = true
-  error.value = null
-  try {
-    const data = await productService.getById(id)
-    product.value = unwrapResource<Product | null>(data, null)
-    if (product.value?.color) selectedColor.value = product.value.color ?? null
-    if (uniqueSizes.value.length > 0) selectedSize.value = uniqueSizes.value[0] ?? null
-    await Promise.all([fetchRelated(), fetchReviews(id)])
-  } catch (err) {
-    error.value = getApiErrorMessage(err, 'Product not found')
-  } finally {
-    loading.value = false
-  }
-}
-
-const fetchRelated = async () => {
-  try {
-    const data = await productService.getAll()
-    const all = unwrapCollection<Product>(data)
-    relatedProducts.value = all.filter((p) => p.id !== product.value?.id).slice(0, 4)
-  } catch {
-    relatedProducts.value = []
-  }
-}
-
-onMounted(() => {
-  const id = Number(route.params.id)
-  if (!isNaN(id)) fetchProduct(id)
-})
-
-watch(
-  () => route.params.id,
-  (newId) => {
-    const id = Number(newId)
-    if (!isNaN(id)) {
-      selectedImage.value = 0
-      submitSuccess.value = false
-      fetchProduct(id)
-    }
-  },
-)
+const {
+  avgRating,
+  cartFeedbackVisible,
+  error,
+  goBack,
+  handleAddToCart,
+  handleBuyNow,
+  hoverRating,
+  isLoggedIn,
+  loading,
+  newComment,
+  newRating,
+  openSections,
+  product,
+  quantity,
+  ratingStars,
+  relatedProducts,
+  reviewCount,
+  reviews,
+  reviewsLoading,
+  selectedColor,
+  selectedImage,
+  selectedSize,
+  submitError,
+  submitLoading,
+  submitReview,
+  submitSuccess,
+  thumbnails,
+  toggleSection,
+  uniqueSizes,
+  wishlist,
+} = useProductDetailPage(productIdParam)
 </script>
 
 <template>
   <NavBar />
+
+  <Transition
+    enter-active-class="transition duration-300 ease-out"
+    enter-from-class="-translate-y-6 opacity-0 scale-95"
+    enter-to-class="translate-y-0 opacity-100 scale-100"
+    leave-active-class="transition duration-200 ease-in"
+    leave-from-class="translate-y-0 opacity-100 scale-100"
+    leave-to-class="-translate-y-6 opacity-0 scale-95"
+  >
+    <div
+      v-if="cartFeedbackVisible"
+      class="fixed left-1/2 top-24 z-[70] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-center justify-between gap-4 rounded-2xl border border-emerald-200 bg-white px-4 py-3 shadow-2xl shadow-black/10"
+    >
+      <div class="flex min-w-0 items-center gap-3">
+        <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
+          <Check class="h-5 w-5" stroke-width="3" />
+        </span>
+        <div class="min-w-0">
+          <p class="text-sm font-bold text-gray-950">Added to cart</p>
+          <p class="truncate text-xs font-medium text-gray-500">{{ product?.name }}</p>
+        </div>
+      </div>
+
+      <RouterLink
+        to="/cart"
+        class="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-black text-white transition hover:bg-gray-800"
+        aria-label="Open cart"
+      >
+        <ShoppingCart class="h-4 w-4" stroke-width="2.5" />
+      </RouterLink>
+    </div>
+  </Transition>
 
   <main class="min-h-screen bg-white">
     <!-- Loading -->
@@ -231,7 +99,7 @@ watch(
     >
       <p class="text-gray-500 text-lg">{{ error }}</p>
       <button
-        @click="router.back()"
+        @click="goBack"
         class="flex items-center gap-2 text-sm font-semibold underline underline-offset-4"
       >
         <ArrowLeft :size="16" /> Go Back
@@ -294,7 +162,7 @@ watch(
           :submit-loading="submitLoading"
           :submit-success="submitSuccess"
           :submit-error="submitError"
-          :is-logged-in="authStore.isLoggedIn"
+          :is-logged-in="isLoggedIn"
           :new-rating="newRating"
           :new-comment="newComment"
           :hover-rating="hoverRating"

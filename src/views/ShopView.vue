@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import Navbar from '@/components/NavBar.vue'
 import Footer from '@/components/Footer.vue'
-import ProductGrid from '@/components/products/ProductGrid.vue'
 import ProductFilter from '@/components/products/ProductFilter.vue'
+import ProductGrid from '@/components/products/ProductGrid.vue'
 import ProductSearch from '@/components/products/ProductSearch.vue'
 </script>
 
@@ -10,31 +10,25 @@ import ProductSearch from '@/components/products/ProductSearch.vue'
   <Navbar />
 
   <main class="mx-auto w-full max-w-[1600px] flex-grow px-6 py-12 lg:px-12">
-    <!-- Page Header -->
     <div class="mb-10">
-      <h1 class="text-3xl font-bold text-black">Men's Collection</h1>
-      <p class="text-sm text-gray-400 mt-1">Explore our curated collection for men</p>
+      <h1 class="text-3xl font-bold text-black">Shop</h1>
+      <p class="mt-1 text-sm text-gray-400">Explore every item available in the store</p>
     </div>
 
-    <div class="flex flex-col md:flex-row gap-12">
-      <!-- Sidebar Filter -->
+    <div class="flex flex-col gap-12 md:flex-row">
       <ProductFilter />
 
-      <!-- Product Area -->
       <div class="flex-grow flex flex-col gap-8">
-        <!-- Top Actions -->
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <span class="text-sm font-medium text-gray-500">Showing all products</span>
+          <span class="text-sm font-medium text-gray-500">Showing all items</span>
           <ProductSearch />
         </div>
 
-        <!-- Grid -->
-        <ProductGrid gender="Men" category="all" />
+        <ProductGrid category="all" />
 
-        <!-- Pagination/Load More -->
         <div class="mt-12 flex justify-center">
           <button
-            class="px-10 py-4 border-2 border-black rounded-full text-sm font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-all duration-300"
+            class="rounded-full border-2 border-black px-10 py-4 text-sm font-bold uppercase tracking-widest transition-all duration-300 hover:bg-black hover:text-white"
           >
             Load More Products
           </button>

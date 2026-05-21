@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useCartStore } from '@/stores/cartStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useCheckoutStore } from '@/stores/checkoutStore'
@@ -8,6 +8,7 @@ import Footer from '@/components/Footer.vue'
 import { CreditCard, Truck, User, Phone, Mail, MapPin, Loader2 } from '@lucide/vue'
 import { formatCurrency } from '@/utils/formatCurrency'
 import type { CheckoutPayload } from '@/types/payment'
+import { userService } from '@/services/userService'
 
 const cartStore = useCartStore()
 const authStore = useAuthStore()
@@ -18,8 +19,26 @@ const error = ref<string | null>(null)
 const form = ref({
   customer_name: authStore.user?.name || '',
   customer_email: authStore.user?.email || '',
-  customer_phone: '',
+  customer_phone: authStore.user?.phone || '',
   shipping_address: '',
+})
+
+watch(
+  () => authStore.user,
+  (user) => {
+    form.value.customer_name = user?.name || ''
+    form.value.customer_email = user?.email || ''
+    form.value.customer_phone = user?.phone || ''
+  },
+)
+
+onMounted(async () => {
+  try {
+    const user = await userService.getProfile()
+    authStore.syncUser(user)
+  } catch {
+    // Existing auth store data is enough for checkout when profile refresh fails.
+  }
 })
 
 const isFormValid = computed(() => {

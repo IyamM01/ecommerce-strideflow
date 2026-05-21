@@ -97,7 +97,7 @@ const handleSubmit = async () => {
             v-model="fullName"
             class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 font-inter text-sm text-primary placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 focus:bg-white transition-all"
             id="fullName"
-            placeholder="Jane Doe"
+            placeholder="Your full name"
             type="text"
             required
             :disabled="isLoading"
@@ -122,7 +122,7 @@ const handleSubmit = async () => {
             v-model="email"
             class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 font-inter text-sm text-primary placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 focus:bg-white transition-all"
             id="email"
-            placeholder="jane@example.com"
+            placeholder="Your email address"
             type="email"
             required
             :disabled="isLoading"

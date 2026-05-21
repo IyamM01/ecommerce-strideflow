@@ -3,6 +3,7 @@ import Navbar from '@/components/NavBar.vue'
 import Footer from '@/components/Footer.vue'
 import ProductGrid from '@/components/products/ProductGrid.vue'
 import ProductFilter from '@/components/products/ProductFilter.vue'
+import ProductSearch from '@/components/products/ProductSearch.vue'
 </script>
 
 <template>
@@ -22,23 +23,13 @@ import ProductFilter from '@/components/products/ProductFilter.vue'
       <!-- Product Area -->
       <div class="flex-grow flex flex-col gap-8">
         <!-- Top Actions -->
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-gray-500"> Showing all products </span>
-          <div class="flex items-center gap-3">
-            <span class="text-sm font-medium text-gray-500">Sort by:</span>
-            <select
-              class="rounded-lg border border-gray-200 bg-white py-2 pl-4 pr-10 text-sm font-medium text-gray-900 focus:border-black focus:ring-1 focus:ring-black transition-colors cursor-pointer"
-            >
-              <option>New Arrivals</option>
-              <option>Price: Low to High</option>
-              <option>Price: High to Low</option>
-              <option>Popularity</option>
-            </select>
-          </div>
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <span class="text-sm font-medium text-gray-500">Showing all products</span>
+          <ProductSearch />
         </div>
 
         <!-- Grid -->
-        <ProductGrid gender="Women" category="all" />
+        <ProductGrid gender="Woman" category="all" />
 
         <!-- Load More -->
         <div class="mt-12 flex justify-center">

@@ -81,10 +81,28 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, requiresAdmin: true, title: 'Edit User' },
   },
   {
+    path: '/admin/brands',
+    name: 'admin-brands',
+    component: () => import('@/views/admin/brands/BrandListView.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true, title: 'Admin Brands' },
+  },
+  {
+    path: '/admin/genders',
+    name: 'admin-genders',
+    component: () => import('@/views/admin/genders/GenderListView.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true, title: 'Admin Genders' },
+  },
+  {
     path: '/',
     name: 'home',
     component: () => import('@/views/HomeView.vue'),
     meta: { title: 'Home' },
+  },
+  {
+    path: '/shop',
+    name: 'shop',
+    component: () => import('@/views/ShopView.vue'),
+    meta: { title: 'Shop' },
   },
   {
     path: '/men',

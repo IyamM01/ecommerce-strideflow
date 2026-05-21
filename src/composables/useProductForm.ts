@@ -1,16 +1,19 @@
-import { computed, reactive, ref, watch, type Ref } from 'vue'
+import { computed, onScopeDispose, reactive, ref, watch, type Ref } from 'vue'
 
 import type { ProductPayload } from '@/types/product'
 import type { ProductFormValues } from '@/types/productForm'
 
+type ProductFormErrors = Record<string, string[]>
+type ProductFormField = keyof ProductFormValues
+
 interface UseProductFormOptions {
-  errors: Ref<Record<string, string[]> | undefined>
+  errors: Ref<ProductFormErrors | undefined>
   initialValues: Ref<Partial<ProductFormValues> | undefined>
   requireImage: Ref<boolean | undefined>
   onSubmit: (payload: ProductPayload) => void
 }
 
-const createEmptyForm = (): ProductFormValues => ({
+const EMPTY_FORM_VALUES: ProductFormValues = {
   name: '',
   description: '',
   price: null,
@@ -23,6 +26,47 @@ const createEmptyForm = (): ProductFormValues => ({
   color: '',
   badge: '',
   image_url: '',
+}
+
+// Field rules are kept as data so validation messages stay easy to scan and update.
+const REQUIRED_TEXT_FIELDS: Array<{
+  field: ProductFormField
+  message: string
+}> = [
+  { field: 'name', message: 'Nama produk wajib diisi.' },
+  { field: 'description', message: 'Deskripsi produk wajib diisi.' },
+]
+
+const REQUIRED_NUMBER_FIELDS: Array<{
+  field: ProductFormField
+  message: string
+}> = [
+  { field: 'price', message: 'Harga wajib diisi.' },
+  { field: 'stock', message: 'Stok wajib diisi.' },
+]
+
+const REQUIRED_SELECT_FIELDS: Array<{
+  field: ProductFormField
+  message: string
+}> = [
+  { field: 'category_id', message: 'Category wajib dipilih.' },
+  { field: 'brand_id', message: 'Brand wajib dipilih.' },
+  { field: 'gender_id', message: 'Gender wajib dipilih.' },
+]
+
+const createFormValues = (values?: Partial<ProductFormValues>): ProductFormValues => ({
+  name: values?.name ?? EMPTY_FORM_VALUES.name,
+  description: values?.description ?? EMPTY_FORM_VALUES.description,
+  price: values?.price ?? EMPTY_FORM_VALUES.price,
+  stock: values?.stock ?? EMPTY_FORM_VALUES.stock,
+  category_id: values?.category_id ?? EMPTY_FORM_VALUES.category_id,
+  brand_id: values?.brand_id ?? EMPTY_FORM_VALUES.brand_id,
+  gender_id: values?.gender_id ?? EMPTY_FORM_VALUES.gender_id,
+  sku: values?.sku ?? EMPTY_FORM_VALUES.sku,
+  size: values?.size ?? EMPTY_FORM_VALUES.size,
+  color: values?.color ?? EMPTY_FORM_VALUES.color,
+  badge: values?.badge ?? EMPTY_FORM_VALUES.badge,
+  image_url: values?.image_url ?? EMPTY_FORM_VALUES.image_url,
 })
 
 const normalizeOptionalText = (value: string) => {
@@ -30,49 +74,90 @@ const normalizeOptionalText = (value: string) => {
   return trimmed ? trimmed : undefined
 }
 
+const isEmptyNumber = (value: unknown) =>
+  value === null || value === '' || (typeof value === 'number' && Number.isNaN(value))
+
+const buildValidationErrors = (
+  form: ProductFormValues,
+  imageFile: File | null,
+  requireImage?: boolean,
+): ProductFormErrors => {
+  const errors: ProductFormErrors = {}
+
+  REQUIRED_TEXT_FIELDS.forEach(({ field, message }) => {
+    const value = form[field]
+
+    if (typeof value === 'string' && !value.trim()) {
+      errors[field] = [message]
+    }
+  })
+
+  REQUIRED_NUMBER_FIELDS.forEach(({ field, message }) => {
+    if (isEmptyNumber(form[field])) {
+      errors[field] = [message]
+    }
+  })
+
+  REQUIRED_SELECT_FIELDS.forEach(({ field, message }) => {
+    if (!form[field]) {
+      errors[field] = [message]
+    }
+  })
+
+  if (requireImage && !imageFile) {
+    errors.image = ['Gambar produk wajib dipilih.']
+  }
+
+  return errors
+}
+
+const buildSubmitPayload = (form: ProductFormValues, imageFile: File | null): ProductPayload => ({
+  name: form.name.trim(),
+  description: form.description.trim(),
+  price: Number(form.price),
+  stock: Number(form.stock),
+  category_id: Number(form.category_id),
+  brand_id: Number(form.brand_id),
+  gender_id: Number(form.gender_id),
+  sku: normalizeOptionalText(form.sku),
+  size: normalizeOptionalText(form.size),
+  color: normalizeOptionalText(form.color),
+  badge: normalizeOptionalText(form.badge),
+  image: imageFile,
+})
+
+/**
+ * Handles product form state, local validation, image preview lifecycle,
+ * and final payload normalization before the parent component submits.
+ */
 export const useProductForm = (options: UseProductFormOptions) => {
-  const form = reactive<ProductFormValues>(createEmptyForm())
+  const form = reactive<ProductFormValues>(createFormValues())
   const imageFile = ref<File | null>(null)
   const imagePreview = ref('')
-  const localErrors = ref<Record<string, string[]>>({})
+  const localErrors = ref<ProductFormErrors>({})
+  const temporaryPreviewUrl = ref<string | null>(null)
 
   const initialValuesKey = computed(() =>
-    JSON.stringify({
-      name: options.initialValues.value?.name ?? '',
-      description: options.initialValues.value?.description ?? '',
-      price: options.initialValues.value?.price ?? null,
-      stock: options.initialValues.value?.stock ?? null,
-      category_id: options.initialValues.value?.category_id ?? null,
-      brand_id: options.initialValues.value?.brand_id ?? null,
-      gender_id: options.initialValues.value?.gender_id ?? null,
-      sku: options.initialValues.value?.sku ?? '',
-      size: options.initialValues.value?.size ?? '',
-      color: options.initialValues.value?.color ?? '',
-      badge: options.initialValues.value?.badge ?? '',
-      image_url: options.initialValues.value?.image_url ?? '',
-    }),
+    JSON.stringify(createFormValues(options.initialValues.value)),
   )
-
-  const allErrors = computed(() => ({
+  const allErrors = computed<ProductFormErrors>(() => ({
     ...options.errors.value,
     ...localErrors.value,
   }))
 
-  const assignFormValues = (values?: Partial<ProductFormValues>) => {
-    form.name = values?.name ?? ''
-    form.description = values?.description ?? ''
-    form.price = values?.price ?? null
-    form.stock = values?.stock ?? null
-    form.category_id = values?.category_id ?? null
-    form.brand_id = values?.brand_id ?? null
-    form.gender_id = values?.gender_id ?? null
-    form.sku = values?.sku ?? ''
-    form.size = values?.size ?? ''
-    form.color = values?.color ?? ''
-    form.badge = values?.badge ?? ''
-    form.image_url = values?.image_url ?? ''
-    imagePreview.value = form.image_url
+  const revokeTemporaryPreviewUrl = () => {
+    if (!temporaryPreviewUrl.value) return
+
+    URL.revokeObjectURL(temporaryPreviewUrl.value)
+    temporaryPreviewUrl.value = null
+  }
+
+  const resetForm = (values?: Partial<ProductFormValues>) => {
+    Object.assign(form, createFormValues(values))
     imageFile.value = null
+    imagePreview.value = form.image_url
+    localErrors.value = {}
+    revokeTemporaryPreviewUrl()
   }
 
   const getFieldError = (field: string) => allErrors.value[field]?.[0]
@@ -80,57 +165,36 @@ export const useProductForm = (options: UseProductFormOptions) => {
   const handleImageChange = (event: Event) => {
     const target = event.target as HTMLInputElement
     const file = target.files?.[0] ?? null
+
     imageFile.value = file
+    revokeTemporaryPreviewUrl()
 
     if (!file) {
       imagePreview.value = form.image_url
       return
     }
 
-    imagePreview.value = URL.createObjectURL(file)
+    temporaryPreviewUrl.value = URL.createObjectURL(file)
+    imagePreview.value = temporaryPreviewUrl.value
   }
 
   const handleSubmit = () => {
-    localErrors.value = {}
-
-    if (!form.name.trim()) localErrors.value.name = ['Nama produk wajib diisi.']
-    if (!form.description.trim()) localErrors.value.description = ['Deskripsi produk wajib diisi.']
-    if (form.price === null || Number.isNaN(form.price))
-      localErrors.value.price = ['Harga wajib diisi.']
-    if (form.stock === null || Number.isNaN(form.stock))
-      localErrors.value.stock = ['Stok wajib diisi.']
-    if (!form.category_id) localErrors.value.category_id = ['Category wajib dipilih.']
-    if (!form.brand_id) localErrors.value.brand_id = ['Brand wajib dipilih.']
-    if (!form.gender_id) localErrors.value.gender_id = ['Gender wajib dipilih.']
-    if (options.requireImage.value && !imageFile.value) {
-      localErrors.value.image = ['Gambar produk wajib dipilih.']
-    }
+    localErrors.value = buildValidationErrors(form, imageFile.value, options.requireImage.value)
 
     if (Object.keys(localErrors.value).length > 0) return
 
-    options.onSubmit({
-      name: form.name.trim(),
-      description: form.description.trim(),
-      price: Number(form.price),
-      stock: Number(form.stock),
-      category_id: Number(form.category_id),
-      brand_id: Number(form.brand_id),
-      gender_id: Number(form.gender_id),
-      sku: normalizeOptionalText(form.sku),
-      size: normalizeOptionalText(form.size),
-      color: normalizeOptionalText(form.color),
-      badge: normalizeOptionalText(form.badge),
-      image: imageFile.value,
-    })
+    options.onSubmit(buildSubmitPayload(form, imageFile.value))
   }
 
   watch(
     initialValuesKey,
     () => {
-      assignFormValues(options.initialValues.value)
+      resetForm(options.initialValues.value)
     },
     { immediate: true },
   )
+
+  onScopeDispose(revokeTemporaryPreviewUrl)
 
   return {
     form,

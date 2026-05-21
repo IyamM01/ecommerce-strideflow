@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { ShoppingCart } from '@lucide/vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { computed, onScopeDispose, ref } from 'vue'
+import { Check, ShoppingCart } from '@lucide/vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import type { Product } from '@/types/product'
 import { useAuthStore } from '@/stores/authStore'
 import { useCartStore } from '@/stores/cartStore'
@@ -13,6 +13,9 @@ const props = defineProps<{
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const router = useRouter()
+const route = useRoute()
+const addedToCart = ref(false)
+let feedbackTimeout: ReturnType<typeof setTimeout> | null = null
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('id-ID', {
@@ -30,11 +33,20 @@ const productSubtitle = computed(() => {
   return props.product.brand?.name || ''
 })
 
+const showAddedFeedback = () => {
+  if (feedbackTimeout) clearTimeout(feedbackTimeout)
+
+  addedToCart.value = true
+  feedbackTimeout = setTimeout(() => {
+    addedToCart.value = false
+  }, 1400)
+}
+
 const handleAddToCart = () => {
   if (!authStore.isLoggedIn) {
     router.push({
       path: '/auth/login',
-      query: { redirect: '/cart' },
+      query: { redirect: route.fullPath },
     })
     return
   }
@@ -48,12 +60,32 @@ const handleAddToCart = () => {
     brand: props.product.brand,
   })
 
-  router.push('/cart')
+  showAddedFeedback()
 }
+
+onScopeDispose(() => {
+  if (feedbackTimeout) clearTimeout(feedbackTimeout)
+})
 </script>
 
 <template>
   <div class="group relative flex flex-col transition-all duration-300">
+    <Transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="-translate-y-6 scale-95 opacity-0"
+      enter-to-class="translate-y-0 scale-100 opacity-100"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="translate-y-0 scale-100 opacity-100"
+      leave-to-class="-translate-y-6 scale-95 opacity-0"
+    >
+      <div
+        v-if="addedToCart"
+        class="fixed left-1/2 top-24 z-[70] inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-xl shadow-emerald-600/20"
+      >
+        <Check :size="15" stroke-width="3" />
+        Added to cart
+      </div>
+    </Transition>
     <!-- Image Container — clickable -->
     <RouterLink :to="`/products/${product.id}`" class="block">
       <div class="relative aspect-4/5 overflow-hidden rounded-2xl bg-[#F6F6F6]">
@@ -106,10 +138,12 @@ const handleAddToCart = () => {
 
         <button
           class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-black text-white shadow-md shadow-black/10 transition-all duration-300 hover:scale-110 hover:bg-gray-800 active:scale-95"
+          :class="addedToCart ? 'scale-110 bg-emerald-600 hover:bg-emerald-600' : ''"
           aria-label="Add to cart"
           @click.prevent="handleAddToCart"
         >
-          <ShoppingCart :size="16" stroke-width="2.5" />
+          <Check v-if="addedToCart" :size="16" stroke-width="3" />
+          <ShoppingCart v-else :size="16" stroke-width="2.5" />
         </button>
       </div>
     </div>

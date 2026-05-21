@@ -15,6 +15,8 @@ const isDashboardRoute = computed(() => route.path === '/admin')
 const isOrderRoute = computed(() => route.path.startsWith('/admin/orders'))
 const isProductRoute = computed(() => route.path.startsWith('/admin/products'))
 const isUserRoute = computed(() => route.path.startsWith('/admin/users'))
+const isBrandRoute = computed(() => route.path.startsWith('/admin/brands'))
+const isGenderRoute = computed(() => route.path.startsWith('/admin/genders'))
 
 const handleLogout = async () => {
   await authStore.logout()
@@ -64,10 +66,23 @@ const handleLogout = async () => {
         <span class="text-sm">Users</span>
       </RouterLink>
 
-      <a class="menu-link" href="#">
-        <span class="material-symbols-outlined">settings</span>
-        <span class="text-sm">Settings</span>
-      </a>
+      <RouterLink
+        to="/admin/brands"
+        class="menu-link"
+        :class="{ 'menu-link-active': isBrandRoute }"
+      >
+        <span class="material-symbols-outlined">sell</span>
+        <span class="text-sm">Brands</span>
+      </RouterLink>
+
+      <RouterLink
+        to="/admin/genders"
+        class="menu-link"
+        :class="{ 'menu-link-active': isGenderRoute }"
+      >
+        <span class="material-symbols-outlined">category</span>
+        <span class="text-sm">Gender</span>
+      </RouterLink>
     </nav>
 
     <div class="mt-auto pt-4 border-t border-outline-variant">

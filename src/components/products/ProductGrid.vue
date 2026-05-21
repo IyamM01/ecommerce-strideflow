@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/productStore'
 import ProductCard from '@/components/products/ProductCard.vue'
 
@@ -9,6 +10,24 @@ const props = defineProps<{
 }>()
 
 const productStore = useProductStore()
+const route = useRoute()
+const router = useRouter()
+
+const normalizeGender = (value: unknown) => {
+  const normalized = String(value ?? '')
+    .trim()
+    .toLowerCase()
+
+  const aliases: Record<string, string> = {
+    female: 'women',
+    kid: 'kids',
+    woman: 'women',
+    child: 'kids',
+    children: 'kids',
+  }
+
+  return aliases[normalized] ?? normalized
+}
 
 onMounted(async () => {
   if (productStore.products.length === 0) {
@@ -21,7 +40,7 @@ const filteredProducts = computed(() => {
     const productGender = product.gender?.slug || product.gender?.name || product.gender
 
     const matchGender = props.gender
-      ? String(productGender).toLowerCase() === props.gender.toLowerCase()
+      ? normalizeGender(productGender) === normalizeGender(props.gender)
       : true
 
     const matchCategory =
@@ -32,6 +51,14 @@ const filteredProducts = computed(() => {
     return matchGender && matchCategory
   })
 })
+
+const clearSearch = () => {
+  productStore.setSearchQuery('')
+
+  if (route.name === 'home') {
+    router.replace({ name: 'home' })
+  }
+}
 </script>
 
 <template>
@@ -48,7 +75,7 @@ const filteredProducts = computed(() => {
       <button
         class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-gray-900 hover:text-gray-900"
         type="button"
-        @click="productStore.setSearchQuery('')"
+        @click="clearSearch"
       >
         Clear Search
       </button>
@@ -79,7 +106,7 @@ const filteredProducts = computed(() => {
         v-if="productStore.searchQuery"
         class="mt-4 text-sm font-bold uppercase tracking-widest underline decoration-2 underline-offset-4"
         type="button"
-        @click="productStore.setSearchQuery('')"
+        @click="clearSearch"
       >
         Reset Search
       </button>

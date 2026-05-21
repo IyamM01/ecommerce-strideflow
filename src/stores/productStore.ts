@@ -83,13 +83,17 @@ export const useProductStore = defineStore('product', {
       this.selectedMaxPrice = price
     },
 
-    resetFilters() {
+    resetCatalogFilters() {
       this.selectedCategory = 'all'
       this.selectedBrand = 'all'
       this.selectedSize = 'all'
       this.selectedColor = 'all'
       this.selectedGender = 'all'
       this.selectedMaxPrice = null
+    },
+
+    resetFilters() {
+      this.resetCatalogFilters()
       this.searchQuery = ''
     },
 

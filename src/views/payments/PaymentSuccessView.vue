@@ -67,7 +67,7 @@ onMounted(() => {
         </button>
 
         <button
-          @click="router.push('/')"
+          @click="router.push('/shop')"
           class="flex items-center justify-center gap-2 w-full bg-white text-gray-900 border border-gray-200 py-4 rounded-lg font-semibold hover:bg-gray-50 transition-all"
         >
           Lanjut Belanja

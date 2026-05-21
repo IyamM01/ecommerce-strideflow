@@ -19,18 +19,21 @@ const form = ref<LoginPayload>({
 const isLoading = ref(false)
 const errorMessage = ref('')
 
+const getLoginRedirectPath = (role?: string) => {
+  if (role === 'admin') return authService.getRedirectPath(role)
+
+  return typeof route.query.redirect === 'string'
+    ? route.query.redirect
+    : authService.getRedirectPath(role)
+}
+
 const handleSubmit = async () => {
   isLoading.value = true
   errorMessage.value = ''
 
   try {
     const user = await authStore.login(form.value)
-
-    const redirectPath =
-      typeof route.query.redirect === 'string'
-        ? route.query.redirect
-        : authService.getRedirectPath(user.role)
-    router.push(redirectPath)
+    router.push(getLoginRedirectPath(user.role))
   } catch (err: unknown) {
     console.error('Login failed:', err)
     if (isAxiosError(err) && err.response?.status === 401) {
@@ -89,7 +92,7 @@ const handleSubmit = async () => {
             class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl font-inter text-sm text-primary placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/5 focus:bg-white focus:outline-none transition-all"
             id="email"
             type="email"
-            placeholder="name@company.com"
+            placeholder="Your email address"
             required
             :disabled="isLoading"
           />
